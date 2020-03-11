@@ -50,9 +50,8 @@ Mean_g_Rep<-matrix(nrow=length(cycle),ncol=nrep)
 Sd_g_Rep<-matrix(nrow=length(cycle),ncol=nrep)
 
 for (i in 1:nrep){
-  
-  for (y in 1:years){ 
- founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=SP_ploidy, returnCommand = FALSE, nThreads = NULL)
+
+   founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=SP_ploidy, returnCommand = FALSE, nThreads = NULL)
     
     SP = SimParam$new(founderPop)
     SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
@@ -67,80 +66,7 @@ for (i in 1:nrep){
     generation<- vector(length=cycle+1,mode="list")
     generation[[1]]<-pop   ### cycle 0, founder pop
     
- # popList<-NULL   
- # 
- #    
- #    if(j=1){
- #        GP0_DH<-makeDH(generation[[1]],nDH=1,simParam=SP)
- #        
- #        females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use=selection,simParam=SP)
- #        males<-selectInd(pop=GP0_DH,gender="M",nInd=n_gp,trait=1,use=selection,simParam=SP)
- #        
- #        GP_F<-row.names(pullQtlGeno(females))
- #        GP_M<-row.names(pullQtlGeno(males))
- #        
- #        GP_F_2<-GP_F[sample(length(GP_F))]
- #        GP_M_2<-GP_M[sample(length(GP_M))]
- #        
- #        # Each GP used to make crosses twice
- #        GP_Fs<-c(GP_F,GP_F_2) 
- #        GP_Ms<-c(GP_M,GP_M_2)
- #        
- #        crossPlan<-cbind(GP_Fs,GP_Ms)
- #        
- #        Pops[[j]]<-GP0_DH
- #        ## Cross to create SP1
- #        SP[[j]]<-makeCross(Pops[[j]],crossPlan=crossPlan,simParam=SP) ## !!!!Update GP0_DH
- #        SP[[j]]<-setPheno(SP[[j]],varE=2,simParam=SP)
- #        
- #        ## Random Select amongst SP1
- #        SPj_s[[j]]<-selectInd(SP[[j]],nInd=100,trait=1,use=selection,simParam=SP)
- #        
- #        ## Make GP DH using SP1
- #        GPj_DH[[j]]<-makeDH(SPj_s[[j]],nDH=25,simParam=SP)	### !!!
- #        
- #        #popList<-list(popList,SP[[i]])
- #                
- #        ####
- #        ### !!! OR Select Top
- #        # SP1_s<-selectInd(SP1,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)
- #        ####
- #        
- #        
- #        
- #        
- #        #### cycle 2
- #        ## Randomly select 200 as female, then randomly select another 200 as male
- #        females[[j]]<-selectInd(pop=Pops[[j]],gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
- #      
- #        males[[j]]<-selectInd(pop=Pops[[j]],gender="M",nInd=n_gp,trait=1,use="rand",simParam=SP)
- #        
- #        
- #        #### 
- #        GP_F<-row.names(pullQtlGeno(females))
- #        GP_M<-row.names(pullQtlGeno(males))
- #        
- #        GP_F_2<-GP_F[sample(length(GP_F))]
- #        GP_M_2<-GP_M[sample(length(GP_M))]
- #        
- #        GP_Fs<-c(GP_F,GP_F_2)
- #        GP_Ms<-c(GP_M,GP_M_2)
- #        
- #        crossPlan<-cbind(GP_Fs,GP_Ms)
- #        
- #        ## Cross to create SP2
- #        SP2<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)	
- #        SP2<-setPheno(SP2,varE=2,simParam=SP)
- #        
- #        ## Select amongst SP2 
- #        SP2_s<-selectInd(SP2,nInd=100,trait=1,use="rand",simParam=SP)					
- #        
- #        ### !!! OR			 
- #        # SP2_s<-selectInd(SP2,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
- #        ####	
- #        
- #        ## Make GP DH using SP2
- #        GP2_DH<-makeDH(SP2_s,nDH=25,simParam=SP)	### !!!
+  for (y in 1:years){ 
  
     GP0_DH<-makeDH(generation[[1]],nDH=1,simParam=SP)	### !!! When n_gp=200, use 1
 	GP0_DH_all<-pullQtlGeno(GP0_DH)	
@@ -283,7 +209,7 @@ GP2_DH<-makeDH(SP2_s,nDH=25,simParam=SP)	### !!!
             
         }
         
-        
+  }      
  }
         
 
