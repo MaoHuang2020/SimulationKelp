@@ -31,6 +31,11 @@ varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5
 **Number of individuals to  phenotype *400* vs *1000* **
 ```{r}
 nCrosses<-400  ## ?? Use shiny to render the number of crosses
+nDH<-1
+##OR
+nCrosses<-500
+nDH<-2
+
 n_gp<-nCrosses/2
 ```
 
@@ -65,24 +70,22 @@ for (i in 1:nrep){
     
     generation<- vector(length=cycle+1,mode="list")
     generation[[1]]<-pop   ### cycle 0, founder pop
-    
-  for (y in 1:years){ 
+
+    GP0_DH<-makeDH(generation[[1]],nDH=nDH,simParam=SP)	
+	  GP0_DH_all<-pullQtlGeno(GP0_DH)	
+	    dim(GP0_DH_all)
+	 
+ TP<-NULL
+ GS<-NULL
+ GEBV<-NULL
  
-    GP0_DH<-makeDH(generation[[1]],nDH=1,simParam=SP)	### !!! When n_gp=200, use 1
-	GP0_DH_all<-pullQtlGeno(GP0_DH)	
-	dim(GP0_DH_all)
-####
-n_gp<-200 ## !!!
-####
-
-
-# ####### 500 Indi, 2GP/SP
-# GP0_DH<-makeDH(generation[[1]],nDH=2,simParam=SP)	### !!! When n_gp=5 needs to use 2			GP0_DH_all<-pullQtlGeno(GP0_DH)
-#	dim(GP0_DH_all)
-# ####
-# n_gp<-500  ##!!!
-# ####
-
+ SP<-NULL
+ SP_s<-NULL
+ GP_DH<-NULL
+ 
+for (y in 1:years){ 
+ 
+if (y<=2){
 
 ## Randomly select 200 as female, then randomly select another 200 as male
 females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
@@ -100,11 +103,11 @@ GP_Ms<-c(GP_M,GP_M_2)
 crossPlan<-cbind(GP_Fs,GP_Ms)
 
 ## Cross to create 400 SP1
-SP1<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)	
-SP1<-setPheno(SP1,varE=2,simParam=SP)
+SP[[y]]<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)	
+SP[[y]]<-setPheno(SP[[y]],varE=2,simParam=SP)
 
 ## Random Select amongst SP1
-SP1_s<-selectInd(SP1,nInd=100,trait=1,use="rand",simParam=SP)					
+SP_s[[y]]<-selectInd(SP[[y]],nInd=100,trait=1,use="rand",simParam=SP)					
 
 ####	
 ### !!! OR Select Top		 
@@ -112,67 +115,20 @@ SP1_s<-selectInd(SP1,nInd=100,trait=1,use="rand",simParam=SP)
 ####	
 
 ## Make GP DH using SP1
-GP1_DH<-makeDH(SP1_s,nDH=25,simParam=SP)	### !!!
+GP_DH[[y]]<-makeDH(SP_s[[y]],nDH=25,simParam=SP)	### !!!
 
+## Year 2, exactly the same scheme as in Year 1
 
-#### Year 2, exactly the same scheme as in Year 1
-## Randomly select 200 as female, then randomly select another 200 as male
-females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
-
-males<-selectInd(pop=GP0_DH,gender="M",nInd=n_gp,trait=1,use="rand",simParam=SP)	
-GP_F<-row.names(pullQtlGeno(females))
-GP_M<-row.names(pullQtlGeno(males))
-
-GP_F_2<-GP_F[sample(length(GP_F))]	  					 
-GP_M_2<-GP_M[sample(length(GP_M))] 					 
-
-GP_Fs<-c(GP_F,GP_F_2)
-GP_Ms<-c(GP_M,GP_M_2)
-
-crossPlan<-cbind(GP_Fs,GP_Ms)
-
-## Cross to create 400 SP2
-SP2<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)	
-SP2<-setPheno(SP2,varE=2,simParam=SP)
-
-## Select amongst SP2 
-SP2_s<-selectInd(SP2,nInd=100,trait=1,use="rand",simParam=SP)					
-	
-### !!! OR			 
-# SP2_s<-selectInd(SP2,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
-####	
-
-## Make GP DH using SP2
-GP2_DH<-makeDH(SP2_s,nDH=25,simParam=SP)	### !!!
-
-
+  }else if (y>2) {
     
-
- popList<-list(SP1,SP2)
- TP<-NULL
- GS<-NULL
- GEBV<-NULL
+ popList<-list(SP1,SP2,popList)
  
- SP_s<-NULL
- GP_DH<-NULL
- 
- GP_DH[[1]]<-GP0_DH
- GP_DH[[2]]<-GP1_DH
- 
- ### loop for Year 3 to 5
- for (y in 3:5){
-    
-     
-     #### cycle 4
-     ## Build GS model using SP1+SP2+SP3
-     ## popList=list(SP1,SP2,SP3)
-
-     
+    ### loop for Year 3 to 5
             TP[[y]]<-mergePops(popList)     ### only has info from 3-5
-            GS[[y]]<-RRBLUP(TP[[y-2]],traits=1,simParam=SP)  ### only has info from 3-5
+            GS[[y]]<-RRBLUP(TP[[y]],traits=1,simParam=SP)  ### only has info from 3-5
             
             ## GEBVs on GP(y-1)s
-            GEBV[[y]]<-setEBV(GP_DH[[y-1]],GS[[y]],simParam=SP)  ### y-1???
+            GEBV[[y]]<-setEBV(GP_DH[[y-2]],GS[[y]],simParam=SP)  ### y-2???
             
             ## Select GP1s GEBVs, generate SP3s
             females<-selectInd(pop=GEBV[[y]],gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
@@ -212,10 +168,6 @@ GP2_DH<-makeDH(SP2_s,nDH=25,simParam=SP)	### !!!
   }      
  }
         
-
-
-
-
 
 
 ```
