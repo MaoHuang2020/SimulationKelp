@@ -33,21 +33,26 @@ varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5
 nCrosses<-400  ## ?? Use shiny to render the number of crosses
 nDH<-1
 ##OR
-nCrosses<-500
-nDH<-2
+# nCrosses<-500
+# nDH<-2
 
 n_gp<-nCrosses/2
 ```
 
 **Number of reps and cycles **
 ```{r}
-nrep<-20  ## ?? Use shiny to render
+nrep<-1  ## ?? Use shiny to render
 cycle <-5
 ```
 
 ## Define the selection *Random* vs *Top*
 ```{r Simulation}
 selection<-"rand" ## ?? Use shiney to render?
+```
+
+## Define years
+```{r}
+years<-5
 ```
 
 ```{r}
@@ -168,6 +173,10 @@ GP_DH[[y]]<-makeDH(SP_s[[y]],nDH=25,simParam=SP)	### !!!
   }      
  }
         
+
+
+
+
 
 
 ```
