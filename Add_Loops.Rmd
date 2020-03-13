@@ -2,13 +2,15 @@
 title: "Add_Loops"
 author: "MaoHuang"
 date: "3/10/2020"
-output: html_document
-#runtime: shiny 
+output:
+  word_document: default
+  html_document: default
 ---
 
 ## Founder population parameters
 ```{r, echo=TRUE,results="hide",message=FALSE, warning=FALSE}
 library(AlphaSimR)
+library(knitr)
 ```
 
 ```{r founder parameters}
@@ -29,7 +31,7 @@ varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5
 ```
 
 **Number of individuals to  phenotype *400* vs *1000* **
-```{r}
+```{r number of ind to phenotype}
 nCrosses<-400  ## ?? Use shiny to render the number of crosses
 nDH<-1         
 ##OR
@@ -39,30 +41,28 @@ n_gp<-nCrosses/2
 ```
 
 **Number of reps and cycles(years) **
-```{r}
+```{r reps and cycles}
 nrep<-1  ## ?? Use shiny to render
 cycles <-3
 ```
 
 ## Define the selection *Random* vs *Top*
-```{r Simulation}
+```{r Selection}
 selection<-"rand" ## ?? Use shiney to render?
 
 ### OR
 ## Select Random or Tops 100 for the Sporophytes
 Rand<-function (Population){
-  Spj_s<-selectInd(Population,nInd=100,trait=1,use="rand",simParam=SP)
-  return(list=Spj_s)
+  Sp_select<-selectInd(Population,nInd=100,trait=1,use="rand",simParam=SP)
+  return(list=Sp_select)
 }
 
 Tops<- function(Population){
-  Spj_s<-selectInd(Population,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
- 	return(llist=Spj_s)
+  Sp_select<-selectInd(Population,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
+ 	return(llist=Sp_select)
 }
   
-  
 ```
-
 
 
 ## Running the reps and cycles
@@ -71,14 +71,19 @@ Tops<- function(Population){
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
      founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
+     save.image("workspace.RData")
 ```  
-   
-```{r}     
+
+
+### This cannot be start as new chunk?   
+```{r include=TRUE}  
+load("workspace.RData")
+getwd()
 for (i in 1:nrep){
 
     # Founder Pop should be here
   
-    SP = SimParam$new(founderPop)
+    SP<-SimParam$new(founderPop)
     SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
     SP$addSnpChip(nSnpPerChr=nSnpPerChr)
     SP$setGender("yes_sys")
@@ -144,7 +149,7 @@ print(j)
             TP_j<-mergePops(Sporo)  
             GS_j<-RRBLUP(TP_j,traits=1,simParam=SP)  ### TP only has info from 1:(j-1)
             
-            ## GEBVs on GP(y-1)s
+            ## GEBVs on GP(y-2)s
             GEBV_j<-setEBV(GP_DH[[j-2]],GS_j,simParam=SP)  ### Use the GP_DH two years ago
             
             females<-selectInd(pop=GEBV_j,gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
@@ -173,8 +178,6 @@ print(j)
                   # Sporo_js<-selectInd(Sporo[3][j],nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
                   ####	
             Sporo_s<-c(Sporo_s,Sporo_js)
-            
-      
             
             ## Make GP_DH_j using Sporo_s
             GP_DH_j<-makeDH(Sporo_s[[j]],nDH=25,simParam=SP)
