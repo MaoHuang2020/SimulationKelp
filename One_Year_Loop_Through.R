@@ -45,7 +45,7 @@ Sel<-function (Population){
   }
   return(list=Sp_select) }
 
-scheme<-paste(s,"_",nPheno,"_2yr",sep="")
+scheme<-paste(s,"_",nPheno,"_1yr",sep="")
 
 
 
@@ -121,7 +121,7 @@ for (i in 1:nrep){
       GS_j<-RRBLUP(TP_j,traits=1,simParam=SP)  ### TP only has info from 1:(j-1)
       
       ## GEBVs on GP(y-2)s
-      GEBV_j<-setEBV(GP_DH[[j-2]],GS_j,simParam=SP)  ### Use the GP_DH two years ago
+      GEBV_j<-setEBV(GP_DH[[j-1]],GS_j,simParam=SP)  ### Use the GP_DH 1 years ago
       
       females<-selectInd(pop=GEBV_j,gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
       males<-selectInd(pop=GEBV_j,gender="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
