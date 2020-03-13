@@ -16,7 +16,7 @@ Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*N
 nInd<-800   # Number of founders
 nChr<-31    # Number of chr
 segSites<-500   # Number of segregating sites per chromosome
-SP_ploidy<-2L   # Ploidy
+Sporo_ploidy<-2L   # Ploidy
 bp<-1e+08       # Base pair length of chromosome
 genLen=1        # Genetic length of chromosome in Morgans
 
@@ -31,15 +31,14 @@ varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5
 **Number of individuals to  phenotype *400* vs *1000* **
 ```{r}
 nCrosses<-400  ## ?? Use shiny to render the number of crosses
-nDH<-1
+nDH<-1         
 ##OR
 # nCrosses<-500
 # nDH<-2
-
 n_gp<-nCrosses/2
 ```
 
-**Number of reps and cycles **
+**Number of reps and cycles(years) **
 ```{r}
 nrep<-1  ## ?? Use shiny to render
 cycle <-5
@@ -50,18 +49,13 @@ cycle <-5
 selection<-"rand" ## ?? Use shiney to render?
 ```
 
-## Define years
-```{r}
-years<-5
-```
-
 ```{r}
 Mean_g_Rep<-matrix(nrow=length(cycle),ncol=nrep)
 Sd_g_Rep<-matrix(nrow=length(cycle),ncol=nrep)
 
 for (i in 1:nrep){
 
-   founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=SP_ploidy, returnCommand = FALSE, nThreads = NULL)
+   founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
     
     SP = SimParam$new(founderPop)
     SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
@@ -84,13 +78,13 @@ for (i in 1:nrep){
  GS<-NULL
  GEBV<-NULL
  
- SP<-NULL
- SP_s<-NULL
+ Sporo<-NULL
+ Sporo_s<-NULL
  GP_DH<-NULL
  
-for (y in 1:years){ 
+for (j in 1:cycles){ 
  
-if (y<=2){
+if (j<=2){
 
 ## Randomly select 200 as female, then randomly select another 200 as male
 females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
@@ -107,38 +101,41 @@ GP_Ms<-c(GP_M,GP_M_2)
 
 crossPlan<-cbind(GP_Fs,GP_Ms)
 
-## Cross to create 400 SP1
-SP[[y]]<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)	
-SP[[y]]<-setPheno(SP[[y]],varE=2,simParam=SP)
-
-## Random Select amongst SP1
-SP_s[[y]]<-selectInd(SP[[y]],nInd=100,trait=1,use="rand",simParam=SP)					
+## Cross to create 400 Sporo1
+Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
+Spj<-setPheno(Spj,varE=2,simParam=SP)
+Sporo<-c(Sporo,Spj)
+## Random Select amongst Sporo1
+Spj_s<-selectInd(Sporo[[j]],nInd=100,trait=1,use="rand",simParam=SP)					
+Sporo_s<-c(Sporo_s,Spj_s)
 
 ####	
 ### !!! OR Select Top		 
-# SP1_s<-selectInd(SP1,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
+# Sporo1_s<-selectInd(Sporo1,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
 ####	
 
-## Make GP DH using SP1
-GP_DH[[y]]<-makeDH(SP_s[[y]],nDH=25,simParam=SP)	### !!!
+## Make GP DH using Sporo1
+GP_DHj<-makeDH(Sporo_s[[j]],nDH=25,simParam=SP)	### !!!
+GP_DH<-c(GP_DH,GP_DHj)
 
 ## Year 2, exactly the same scheme as in Year 1
 
-  }else if (y>2) {
+  }else if (j>2) {
     
- popList<-list(SP1,SP2,popList)
+ popList<-list(Sporo[[1]],Sporo[[2]])   ### ???
  
     ### loop for Year 3 to 5
-            TP[[y]]<-mergePops(popList)     ### only has info from 3-5
-            GS[[y]]<-RRBLUP(TP[[y]],traits=1,simParam=SP)  ### only has info from 3-5
+            TP_j<-mergePops(popList)     ### only has info from 3-5 ???/
+            GS_j<-RRBLUP(TP_j,traits=1,simParam=SP)  ### only has info from 3-5
             
             ## GEBVs on GP(y-1)s
-            GEBV[[y]]<-setEBV(GP_DH[[y-2]],GS[[y]],simParam=SP)  ### y-2???
+            GEBV_j<-setEBV(GP_DH[[j-2]],GS_j,simParam=SP)  ### y-2???
             
-            ## Select GP1s GEBVs, generate SP3s
-            females<-selectInd(pop=GEBV[[y]],gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
+            # GEBV[[j]]<-c(GEBV,GEBV_j)
+            ## Select GP1s GEBVs, generate Sporo3s
+            females<-selectInd(pop=GEBV_j,gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
             
-            males<-selectInd(pop=GEBV[[y]],gender="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
+            males<-selectInd(pop=GEBV_j,gender="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
             
             GP_F<-row.names(pullQtlGeno(females))
             GP_M<-row.names(pullQtlGeno(males))
@@ -151,22 +148,24 @@ GP_DH[[y]]<-makeDH(SP_s[[y]],nDH=25,simParam=SP)	### !!!
             
             crossPlan<-cbind(GP_Fs,GP_Ms)
             
-            ## Cross to create SPy
-            SP[[y]]<-makeCross(GP1_DH_GEBV,crossPlan=crossPlan,simParam=SP)
-            SP[[y]]<-setPheno(SP[[y]],varE=2,simParam=SP)
+            ## Cross to create Sporoy
+            Sporo_j<-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
+            Sporo[[j]]<-makeCross()
             
-            ## Select amongst SPy 
-            SP_s[[y]]<-selectInd(SP[[y]],nInd=100,trait=1,use="rand",simParam=SP)
+            Sporo[[y]]<-setPheno(Sporo[[y]],varE=2,simParam=SP)
+            
+            ## Select amongst Sporoy 
+            Sporo_s[[y]]<-selectInd(Sporo[[y]],nInd=100,trait=1,use="rand",simParam=SP)
             
             ### !!! OR			 
-            # SP3_s<-selectInd(SP3,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
+            # Sporo3_s<-selectInd(Sporo3,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
             ####	
             
-            ## Make GP_DH_y using SPy
-            GP_DH[[y]]<-makeDH(SP_s[[y]],nDH=25,simParam=SP)
+            ## Make GP_DH_y using Sporoy
+            GP_DH[[y]]<-makeDH(Sporo_s[[y]],nDH=25,simParam=SP)
             
             
-             popList=list(popList,SP[[y]])  ###
+             popList=list(popList,Sporo[[y]])  ###
             
         }
         
