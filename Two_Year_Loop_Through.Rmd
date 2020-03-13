@@ -24,44 +24,54 @@ nSnpPerChr<-100  # Number of SNP per chromosome
 nQtlPerChr<-100  # Number of QTL per chromosome
 mean_Trait<-0    # Trait mean
 var_Trait<-1     # Trait variance
-varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5  ## Dry matter vs Wet biomass
+varE<-2          # !!! This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass
 
 nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
 
+nDH<- 25         # !!! Or 96
 ```
 
-## Number of individuals to Phenotype, Reps and cycles
+## Define: Number of Sporo to Phenotype
 ```{r Phenotyping, Reps, Cycles}
-nPheno<-400  ## ?? Use shiny to render the number of crosses
-### nPheno<-1000
+nPheno<-400  ##### !!!! Define
+###OR nPheno<-1000
 
 n_gp<-nPheno/2
-
+```
+## Define: Reps and Cycles
+```{r}
 nrep<-1  ## ?? Use shiny to render
 cycles <-3
 ```
 
-## Define the selection *Random* vs *Top*
+## Define: Sporo selection *Random* vs *Top*
 ```{r Selection}
 
 ### Select Random or Tops for the Sporophytes
-Rand<-function (Population){
+s="Rand"    ######  !!!! Define 
+## OR s="Top
+
+Sel<-function (Population){
+      if (s=="Rand"){
   Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-  return(list=Sp_select)
-}
+      }else if (s =="Top"){
+  Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
+  }
+  return(list=Sp_select) }
+    
+scheme<-paste(s,"_",nPheno,sep="")
+```
 
-Tops<- function(Population,nCrosses){
-  Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
- 	return(list=Sp_select)
-}
-
-scheme<-paste("Rand_",nPheno,sep="")
+## Define: number of GPs available during the cytometry
+```{r}
 ```
 
 ## Running the reps and cycles
 ```{r Run reps and cycles}
+  
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
+  
 for (i in 1:nrep){
     founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
     # Founder Pop should be here
@@ -113,17 +123,14 @@ crossPlan<-cbind(GP_Fs,GP_Ms)
 Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
 Spj<-setPheno(Spj,varE=2,simParam=SP)
 Sporo<-c(Sporo,Spj)
-
+  
 ## Select amongst Spj
-Spj_s<-Rand(Sporo[[j]])
+Spj_s<-Sel(Sporo[[j]])
 
-            ### !!! OR			 
-            # Spj_s<-Tops(Sporo[[j]])
-            ####		
 Sporo_s<-c(Sporo_s,Spj_s)
 
 ## Make GP DH using Sporo_s
-GP_DHj<-makeDH(Sporo_s[[j]],nDH=25,simParam=SP)	### !!!
+GP_DHj<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)	### !!!
 GP_DH<-c(GP_DH,GP_DHj)
 print(j)
 
@@ -149,22 +156,19 @@ print(j)
             
             crossPlan<-cbind(GP_Fs,GP_Ms)
             
-            ## Cross to create Sporoy
+            ## Cross to create Sporo_j
             Sporo_j<-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
             Sporo_j<-setPheno(Sporo_j,varE=2,simParam=SP)
             
             Sporo<-c(Sporo,Sporo_j)
             
             ## Select amongst Sporoy 
-            Sporo_js<-Rand(Sporo[[j]])
-            
-                          ### !!! OR			 
-                          #Sporo_js<-Tops(Sporo[[j]])	
-                          ####	
+            Sporo_js<-Sel(Sporo[[j]])
+
             Sporo_s<-c(Sporo_s,Sporo_js)
             
             ## Make GP_DH_j using Sporo_s
-            GP_DH_j<-makeDH(Sporo_s[[j]],nDH=25,simParam=SP)
+            GP_DH_j<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)
             GP_DH<-c(GP_DH,GP_DH_j)
             
          print(j)   

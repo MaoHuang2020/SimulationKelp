@@ -11,11 +11,9 @@ output:
 ```{r, echo=TRUE,results="hide",message=FALSE, warning=FALSE}
 library(AlphaSimR)
 library(knitr)
-```
 
-```{r founder parameters}
-Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)
-nInd<-800   # Number of founders
+Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)  ## If Ne=600, Pop str will inflat it
+nInd<-1000   # Number of founders
 nChr<-31    # Number of chr
 segSites<-500   # Number of segregating sites per chromosome
 Sporo_ploidy<-2L   # Ploidy
@@ -26,18 +24,18 @@ nSnpPerChr<-100  # Number of SNP per chromosome
 nQtlPerChr<-100  # Number of QTL per chromosome
 mean_Trait<-0    # Trait mean
 var_Trait<-1     # Trait variance
-varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5
+varE<-2          # *** This is starting H=0.33,  H=0.1 or H=0.5  ## Dry matter vs Wet biomass
+
+nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
 
 ```
 
 **Number of individuals to  phenotype *400* vs *1000* **
 ```{r number of ind to phenotype}
-nCrosses<-400  ## ?? Use shiny to render the number of crosses
-nDH<-1         
-##OR
-# nCrosses<-500
-# nDH<-2
-n_gp<-nCrosses/2
+nPheno<-400  ## ?? Use shiny to render the number of crosses
+### nCrosses<-1000
+
+n_gp<-nPheno/2
 ```
 
 **Number of reps and cycles(years) **
@@ -50,37 +48,29 @@ cycles <-3
 ```{r Selection}
 selection<-"rand" ## ?? Use shiney to render?
 
-### OR
-## Select Random or Tops 100 for the Sporophytes
+### Select Random or Tops for the Sporophytes
 Rand<-function (Population){
-  Sp_select<-selectInd(Population,nInd=100,trait=1,use="rand",simParam=SP)
+  Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
   return(list=Sp_select)
 }
 
-Tops<- function(Population){
-  Sp_select<-selectInd(Population,nInd=100,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
+Tops<- function(Population,nCrosses){
+  Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	
  	return(llist=Sp_select)
 }
   
+save.image("workspace.RData")
 ```
 
 
 ## Running the reps and cycles
 ```{r}
+load("workspace.RData")
 
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
-     founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
-     save.image("workspace.RData")
-```  
-
-
-### This cannot be start as new chunk?   
-```{r include=TRUE}  
-load("workspace.RData")
-getwd()
 for (i in 1:nrep){
-
+    founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
     # Founder Pop should be here
   
     SP<-SimParam$new(founderPop)
@@ -96,7 +86,7 @@ for (i in 1:nrep){
     generation<- vector(length=(cycles+1),mode="list")
     generation[[1]]<-pop   ### cycle 0, founder pop
 
-    GP0_DH<-makeDH(generation[[1]],nDH=nDH,simParam=SP)	
+    GP0_DH<-makeDH(generation[[1]],nDH=nDH0,simParam=SP)  ### Twice GPs available for making SPs	
 	  GP0_DH_all<-pullQtlGeno(GP0_DH)	
 	    dim(GP0_DH_all)
 	 

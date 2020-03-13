@@ -385,39 +385,44 @@ nSnpPerChr&lt;-100  # Number of SNP per chromosome
 nQtlPerChr&lt;-100  # Number of QTL per chromosome
 mean_Trait&lt;-0    # Trait mean
 var_Trait&lt;-1     # Trait variance
-varE&lt;-2          # *** This is starting H=0.33,  H=0.1 or H=0.5  ## Dry matter vs Wet biomass
+varE&lt;-2          # *** This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass
 
 nDH0&lt;-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH</code></pre>
 </div>
-<div id="number-of-individuals-to-phenotype-reps-and-cycles" class="section level2">
-<h2>Number of individuals to Phenotype, Reps and cycles</h2>
-<pre class="r"><code>nPheno&lt;-400  ## ?? Use shiny to render the number of crosses
-### nPheno&lt;-1000
+<div id="define-number-of-sporo-to-phenotype" class="section level2">
+<h2>Define: Number of Sporo to Phenotype</h2>
+<pre class="r"><code>nPheno&lt;-400  ##### !!!! Define
+###OR nPheno&lt;-1000
 
-n_gp&lt;-nPheno/2
-
-nrep&lt;-1  ## ?? Use shiny to render
+n_gp&lt;-nPheno/2</code></pre>
+</div>
+<div id="define-reps-and-cycles" class="section level2">
+<h2>Define: Reps and Cycles</h2>
+<pre class="r"><code>nrep&lt;-1  ## ?? Use shiny to render
 cycles &lt;-3</code></pre>
 </div>
-<div id="define-the-selection-random-vs-top" class="section level2">
-<h2>Define the selection <em>Random</em> vs <em>Top</em></h2>
+<div id="define-sporo-selection-random-vs-top" class="section level2">
+<h2>Define: Sporo selection <em>Random</em> vs <em>Top</em></h2>
 <pre class="r"><code>### Select Random or Tops for the Sporophytes
-Rand&lt;-function (Population){
+s=&quot;Rand&quot;    ######  !!!! Define 
+## OR s=&quot;Top
+
+
+Sel&lt;-function (Population){
+      if (s==&quot;Rand&quot;){
   Sp_select&lt;-selectInd(Population,nInd=nPheno*0.1,trait=1,use=&quot;rand&quot;,simParam=SP)
-  return(list=Sp_select)
-}
-
-Tops&lt;- function(Population,nCrosses){
-  Sp_select&lt;-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use=&quot;pheno&quot;,simParam=SP)   
-    return(list=Sp_select)
-}
-
-scheme&lt;-paste(&quot;Rand_&quot;,nPheno,sep=&quot;&quot;)</code></pre>
+      }else if (s ==&quot;Top&quot;){
+  Sp_select&lt;-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use=&quot;pheno&quot;,simParam=SP)    
+  }
+  return(list=Sp_select) }
+    
+scheme&lt;-paste(s,&quot;_&quot;,nPheno,sep=&quot;&quot;)</code></pre>
 </div>
 <div id="running-the-reps-and-cycles" class="section level2">
 <h2>Running the reps and cycles</h2>
 <pre class="r"><code>Mean_g_Rep&lt;-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep&lt;-matrix(nrow=cycles,ncol=nrep)
+  
 for (i in 1:nrep){
     founderPop&lt;-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
     # Founder Pop should be here
@@ -469,13 +474,10 @@ crossPlan&lt;-cbind(GP_Fs,GP_Ms)
 Spj&lt;-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
 Spj&lt;-setPheno(Spj,varE=2,simParam=SP)
 Sporo&lt;-c(Sporo,Spj)
-
+  
 ## Select amongst Spj
-Spj_s&lt;-Rand(Sporo[[j]])
+Spj_s&lt;-Sel(Sporo[[j]])
 
-            ### !!! OR           
-            # Spj_s&lt;-Tops(Sporo[[j]])
-            ####        
 Sporo_s&lt;-c(Sporo_s,Spj_s)
 
 ## Make GP DH using Sporo_s
@@ -505,18 +507,15 @@ print(j)
             
             crossPlan&lt;-cbind(GP_Fs,GP_Ms)
             
-            ## Cross to create Sporoy
+            ## Cross to create Sporo_j
             Sporo_j&lt;-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
             Sporo_j&lt;-setPheno(Sporo_j,varE=2,simParam=SP)
             
             Sporo&lt;-c(Sporo,Sporo_j)
             
             ## Select amongst Sporoy 
-            Sporo_js&lt;-Rand(Sporo[[j]])
-            
-                          ### !!! OR             
-                          #Sporo_js&lt;-Tops(Sporo[[j]])   
-                          ####  
+            Sporo_js&lt;-Sel(Sporo[[j]])
+
             Sporo_s&lt;-c(Sporo_s,Sporo_js)
             
             ## Make GP_DH_j using Sporo_s
