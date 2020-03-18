@@ -1,5 +1,5 @@
-Simul<-function(varE,nDH,nPheno,nrep,s,cycles){
 
+Simul<-function(varE,nDH,nPheno,nrep,cycles){
 library(AlphaSimR)
   
   Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)  ## If Ne=600, Pop str will inflat it
@@ -28,13 +28,6 @@ nrep<-nrep  ## 100 Use shiny to render
 cycles <-cycles ## 5
   
 s=s
-Sel<-function (Population){
-  if (s=="Rand"){
-    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-  }else if (s =="Top"){
-    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
-  }
-  return(list=Sp_select) }
 
   ## Running the reps and cycles
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
@@ -49,6 +42,14 @@ for (i in 1:nrep){
     SP$setGender("yes_sys")
     SP$setTrackRec(TRUE)
    
+    Sel<-function (Population){
+      if (s=="Rand"){
+        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
+      }else if (s =="Top"){
+        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
+      }
+      return(list=Sp_select) }
+    
     pop <- newPop(founderPop, simParam=SP)
     pop<-setPheno(pop,varE=varE,simParam=SP)
     genMean=meanG(pop)
@@ -160,5 +161,4 @@ for (i in 1:nrep){
   write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
   write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
   write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
-  
 }
