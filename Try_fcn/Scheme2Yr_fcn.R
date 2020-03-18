@@ -1,5 +1,5 @@
 Simul<-function(varE,nDH,nPheno,nrep,s,cycles){
-  
+
 library(AlphaSimR)
   
   Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)  ## If Ne=600, Pop str will inflat it
@@ -20,7 +20,6 @@ varE<-varE          # 5.67!!! This is starting H=0.33,  Try another H to represe
 nDH<-nDH          # 25!!! Or 96
 
   ## Define: Number of Sporo to Phenotype
-  ###nPheno<-400  ##### 1000!!!! Define
 nPheno<-nPheno
 n_gp<-nPheno/2
   
@@ -28,34 +27,27 @@ n_gp<-nPheno/2
 nrep<-nrep  ## 100 Use shiny to render
 cycles <-cycles ## 5
   
-  ## Define: Sporo selection *Random* vs *Top*
-  ### Select Random or Tops for the Sporophytes
-  ### s="Rand"    ######  !!!! Define 
-  ###s="Top"
+s=s
+Sel<-function (Population){
+  if (s=="Rand"){
+    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
+  }else if (s =="Top"){
+    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
+  }
+  return(list=Sp_select) }
 
-  
   ## Running the reps and cycles
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
   
 for (i in 1:nrep){
     founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
-    # Founder Pop should be here
-    
+  
     SP<-SimParam$new(founderPop)
     SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
     SP$addSnpChip(nSnpPerChr=nSnpPerChr)
     SP$setGender("yes_sys")
     SP$setTrackRec(TRUE)
- 
-    
-    Sel<-function (Population){
-      if (s=="Rand"){
-        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-      }else if (s =="Top"){
-        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
-      }
-      return(list=Sp_select) }
    
     pop <- newPop(founderPop, simParam=SP)
     pop<-setPheno(pop,varE=varE,simParam=SP)
@@ -109,7 +101,7 @@ for (i in 1:nrep){
         GP_DH<-c(GP_DH,GP_DHj)
         print(j)
         
-      } else if (j>2) {
+      }else if(j>2){
         print (j)
         TP_j<-mergePops(Sporo)  
         GS_j<-RRBLUP(TP_j,traits=1,simParam=SP)  ### TP only has info from 1:(j-1)
