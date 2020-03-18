@@ -14,7 +14,7 @@ nSnpPerChr<-100  # Number of SNP per chromosome
 nQtlPerChr<-100  # Number of QTL per chromosome
 mean_Trait<-0    # Trait mean
 var_Trait<-1     # Trait variance
-varE<-2          # !!! This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass
+varE<-2          # !!! This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass (0.15)
 
 nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
 

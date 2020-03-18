@@ -1,4 +1,4 @@
-Simul<-function(varE,nDH,nPheno,nrep,sel,cycles){
+Simul<-function(varE,nDH,nPheno,nrep,s,cycles){
   
 library(AlphaSimR)
   
@@ -32,17 +32,7 @@ cycles <-cycles ## 5
   ### Select Random or Tops for the Sporophytes
   ### s="Rand"    ######  !!!! Define 
   ###s="Top"
-s=sel
-  
-  Sel<-function (Population){
-    if (s=="Rand"){
-      Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-    }else if (s =="Top"){
-      Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
-    }
-    return(list=Sp_select) }
-  
-scheme<-paste(s,"_",nPheno,"_2yr",sep="")
+
   
   ## Running the reps and cycles
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
@@ -57,7 +47,16 @@ for (i in 1:nrep){
     SP$addSnpChip(nSnpPerChr=nSnpPerChr)
     SP$setGender("yes_sys")
     SP$setTrackRec(TRUE)
+ 
     
+    Sel<-function (Population){
+      if (s=="Rand"){
+        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
+      }else if (s =="Top"){
+        Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
+      }
+      return(list=Sp_select) }
+   
     pop <- newPop(founderPop, simParam=SP)
     pop<-setPheno(pop,varE=varE,simParam=SP)
     genMean=meanG(pop)
@@ -162,11 +161,12 @@ for (i in 1:nrep){
   
   Mean_g<-rowMeans(Mean_g_Rep)
   Sd_g<-rowMeans(Sd_g_Rep)
-  
   Mean_Sd<-cbind(Mean_g,Sd_g)
+
+  scheme<-paste(s,"_",nPheno,"_2yr_nDH",nDH,"_varE",varE,"_",sep="")
   
-  write.csv(Mean_g_Rep,paste(scheme,"_Mean_g_WithRep.csv",sep=""))
-  write.csv(Sd_g_Rep,paste(scheme,"_Sd_g_WithRep.csv",sep=""))
-  write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_AverageOverRep.csv",sep=""))
+  write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
+  write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
+  write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
   
 }

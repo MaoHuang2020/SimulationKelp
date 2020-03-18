@@ -45,7 +45,7 @@ Sel<-function (Population){
   }
   return(list=Sp_select) }
 
-scheme<-paste(s,"_",nPheno,"_2yr",sep="")
+scheme<-paste(s,"_",nPheno,"_1yr",sep="") ####
 
 
 

@@ -40,9 +40,7 @@ s="Rand"    ######  !!!! Define
 Sel<-function (Population){
   if (s=="Rand"){
     Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-  }else if (s =="Top"){
-    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,selectTop=TRUE,use="pheno",simParam=SP)	 
-  }
+  }else if (s =="Top")
   return(list=Sp_select) }
 
 scheme<-paste(s,"_",nPheno,"_1yr",sep="")
