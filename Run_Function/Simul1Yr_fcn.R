@@ -1,43 +1,32 @@
-
-## Basic Parameters
-
-library(AlphaSimR)
-Ne=60       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)  ## If Ne=600, Pop str will inflat it
-nInd<-1000   # Number of founders
-nChr<-31    # Number of chr
-segSites<-500   # Number of segregating sites per chromosome
-Sporo_ploidy<-2L   # Ploidy
-bp<-1e+08       # Base pair length of chromosome
-genLen=1        # Genetic length of chromosome in Morgans
-
-nSnpPerChr<-100  # Number of SNP per chromosome
-nQtlPerChr<-100  # Number of QTL per chromosome
-mean_Trait<-0    # Trait mean
-var_Trait<-1     # Trait variance
-nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
-
-
-nDH<- nDH         # !!! Or 96
-varE<-varE          # !!! This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass
-
-## Define: Number of Sporo to Phenotype
-nPheno<-nPheno  ##### !!!! Define
-n_gp<-nPheno/2
-
-## Define: Reps and Cycles
-nrep<-nrep   #### 
-cycles <-cycles
-
-
-## Define: Sporo selection *Random* vs *Top*
-### Select Random or Tops for the Sporophytes
-s=s    ####
-Sel<-function (Population){
-  if (s=="Rand"){
-    Sp_select<-selectInd(Population,nInd=nPheno*0.1,trait=1,use="rand",simParam=SP)
-  }else if (s =="Top")
-    return(list=Sp_select) }
-
+Simul1Yr<-function(selection,nPheno,nDH,varE,Ne,nrep,cycles){
+  
+  library(AlphaSimR)
+  ## Define: Number of Sporo to Phenotype
+  nPheno<-nPheno
+  n_gp<-nPheno/2
+  
+  ## Define: Reps and Cycles
+  nrep<-nrep  ## 100 Use shiny to render
+  cycles <-cycles ## 5
+  
+  varE<-varE          # 5.67!!! This is starting H=0.33,  Try another H to represent Dry matter vs Wet biomass (0.15)
+  nDH<-nDH          # 25!!! Or 96
+  
+  Ne=Ne       # Historical effective population size, estimated via E(r2)=1/(1+4*Ne*c)  ## If Ne=600, Pop str will inflat it
+  
+  nInd<-1000   # Number of founders
+  nChr<-31    # Number of chr
+  segSites<-500   # Number of segregating sites per chromosome
+  Sporo_ploidy<-2L   # Ploidy
+  bp<-1e+08       # Base pair length of chromosome
+  genLen=1        # Genetic length of chromosome in Morgans
+  
+  nSnpPerChr<-100  # Number of SNP per chromosome
+  nQtlPerChr<-100  # Number of QTL per chromosome
+  mean_Trait<-0    # Trait mean
+  var_Trait<-1     # Trait variance
+  nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
+  
 ## Running the reps and cycles
 Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
 Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
@@ -60,7 +49,7 @@ for (i in 1:nrep){
   generation[[1]]<-pop   ### cycle 0, founder pop
   
   GP0_DH<-makeDH(generation[[1]],nDH=nDH0,simParam=SP)  ### Twice GPs available for making SPs	
-  GP0_DH_all<-pullQtlGeno(GP0_DH)	
+  GP0_DH_all<-pullQtlGeno(GP0_DH,simParam=SP)	
   dim(GP0_DH_all)
   
   GS<-NULL
@@ -78,8 +67,8 @@ for (i in 1:nrep){
       females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
       males<-selectInd(pop=GP0_DH,gender="M",nInd=n_gp,trait=1,use="rand",simParam=SP)	
       
-      GP_F<-row.names(pullQtlGeno(females))
-      GP_M<-row.names(pullQtlGeno(males))
+      GP_F<-row.names(pullQtlGeno(females,simParam=SP))
+      GP_M<-row.names(pullQtlGeno(males,simParam=SP))
       
       GP_F_2<-GP_F[sample(length(GP_F))]	  					 
       GP_M_2<-GP_M[sample(length(GP_M))] 					 
@@ -95,8 +84,9 @@ for (i in 1:nrep){
       Sporo<-c(Sporo,Spj)
       
       ## Select amongst Spj
-      Spj_s<-Sel(Sporo[[j]])
+      #Spj_s<-Sel(Sporo[[j]])
       
+      Spj_s<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
       Sporo_s<-c(Sporo_s,Spj_s)
       
       ## Make GP DH using Sporo_s
@@ -115,8 +105,8 @@ for (i in 1:nrep){
       females<-selectInd(pop=GEBV_j,gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
       males<-selectInd(pop=GEBV_j,gender="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
       
-      GP_F<-row.names(pullQtlGeno(females))
-      GP_M<-row.names(pullQtlGeno(males))
+      GP_F<-row.names(pullQtlGeno(females,simParam=SP))
+      GP_M<-row.names(pullQtlGeno(males,simParam=SP))
       
       GP_F_2<-GP_F[sample(length(GP_F))]
       GP_M_2<-GP_M[sample(length(GP_M))]
@@ -133,7 +123,7 @@ for (i in 1:nrep){
       Sporo<-c(Sporo,Sporo_j)
       
       ## Select amongst Sporoy 
-      Sporo_js<-Sel(Sporo[[j]])
+      Sporo_js<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
       
       Sporo_s<-c(Sporo_s,Sporo_js)
       
@@ -159,8 +149,10 @@ Sd_g<-rowMeans(Sd_g_Rep)
 
 Mean_Sd<-cbind(Mean_g,Sd_g)
 
-scheme<-paste(s,"_",nPheno,"_1yr_nDH",nDH,"_varE",varE,"_",sep="")
+scheme<-paste(selection,"_",nPheno,"_1yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
 
 write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
 write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
 write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
+
+}
