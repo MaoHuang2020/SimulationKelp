@@ -31,3 +31,16 @@ Simul2Yr(selection="pheno",nPheno=400,nDH=25,varE=2,Ne=600,nrep=100,cycles=7)
 Simul2Yr(selection="pheno",nPheno=1000,nDH=25,varE=2,Ne=60,nrep=100,cycles=7)
 Simul2Yr(selection="pheno",nPheno=1000,nDH=25,varE=2,Ne=600,nrep=100,cycles=7)
 
+
+### nDH1_varE3
+Simul2Yr(selection="rand",nPheno=400,nDH=25,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul2Yr(selection="rand",nPheno=400,nDH=25,varE=1.22,Ne=600,nrep=100,cycles=7)
+
+Simul2Yr(selection="rand",nPheno=1000,nDH=25,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul2Yr(selection="rand",nPheno=1000,nDH=25,varE=1.22,Ne=600,nrep=100,cycles=7)
+
+Simul2Yr(selection="pheno",nPheno=400,nDH=25,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul2Yr(selection="pheno",nPheno=400,nDH=25,varE=1.22,Ne=600,nrep=100,cycles=7)
+
+Simul2Yr(selection="pheno",nPheno=1000,nDH=25,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul2Yr(selection="pheno",nPheno=1000,nDH=25,varE=1.22,Ne=600,nrep=100,cycles=7)
