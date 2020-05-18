@@ -1,7 +1,7 @@
 #### Test
 
-Simul1Yr(selection="rand",nPheno=400,nDH=25,varE=5.67,Ne=60,nrep=1,cycles=5)
-Simul2Yr(selection="rand",nPheno=400,nDH=25,varE=5.67,Ne=60,nrep=1,cycles=5)
+Simul1Yr(selection="rand",nPheno=400,nDH=25,varE=5.67,Ne=60,nrep=10,cycles=5)
+Simul2Yr(selection="rand",nPheno=400,nDH=25,varE=5.67,Ne=60,nrep=10,cycles=5)
 
 
 ### nDH1_varE1

@@ -81,7 +81,7 @@ for (i in 1:nrep){
       ## Cross to create 400 Spj
       Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
       Spj<-setPheno(Spj,varE=2,simParam=SP)
-      Sporo<-c(Sporo,Spj)
+      Sporo<-c(Sporo,Spj)  ### This is a list now
       
       ## Select amongst Spj
       #Spj_s<-Sel(Sporo[[j]])

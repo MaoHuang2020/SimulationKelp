@@ -27,3 +27,15 @@ Simul1Yr(selection="pheno",nPheno=400,nDH=96,varE=2,Ne=600,nrep=100,cycles=7) #s
 Simul1Yr(selection="pheno",nPheno=1000,nDH=96,varE=2,Ne=60,nrep=100,cycles=7)
 Simul1Yr(selection="pheno",nPheno=1000,nDH=96,varE=2,Ne=600,nrep=100,cycles=7) # nPheno 
 
+### nDH2_varE3
+Simul1Yr(selection="rand",nPheno=400,nDH=96,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul1Yr(selection="rand",nPheno=400,nDH=96,varE=1.22,Ne=600,nrep=100,cycles=7) # Ne change
+
+Simul1Yr(selection="rand",nPheno=1000,nDH=96,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul1Yr(selection="rand",nPheno=1000,nDH=96,varE=1.22,Ne=600,nrep=100,cycles=7) # nPheno change
+
+Simul1Yr(selection="pheno",nPheno=400,nDH=96,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul1Yr(selection="pheno",nPheno=400,nDH=96,varE=1.22,Ne=600,nrep=100,cycles=7) #selection 
+
+Simul1Yr(selection="pheno",nPheno=1000,nDH=96,varE=1.22,Ne=60,nrep=100,cycles=7)
+Simul1Yr(selection="pheno",nPheno=1000,nDH=96,varE=1.22,Ne=600,nrep=100,cycles=7) # nPheno 
