@@ -23,12 +23,23 @@ All.df<-do.call(rbind.data.frame,All)
   head(All.df)    
   tail(All.df)
   str(All.df)
+library(stringr)  
 StringSplit<-str_split_fixed(string=All.df$Shorten,"_",7) ### This text string becomes a 336x7 matrix
   head(StringSplit)
   dim(StringSplit)
 All.df$nDH<-StringSplit[,4]
 All.df$Ne<-StringSplit[,6]
 All.df$varE<-StringSplit[,5]
+
+
+write.csv(All.df,paste(N.DH,"_All.df.csv",sep=""))
+
+All.df %>%
+group_by(Year) %>%                         # Specify group indicator (TestSP/SelectSP/Year)
+  summarise_at(vars(Mean),              # Specify column
+               list(name = mean)) 
+
+
 
 library(ggplot2)
 library(dplyr)
