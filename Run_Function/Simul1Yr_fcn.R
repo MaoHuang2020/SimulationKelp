@@ -87,7 +87,7 @@ for (i in 1:nrep){
       #Spj_s<-Sel(Sporo[[j]])
       
       Spj_s<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
-      Sporo_s<-c(Sporo_s,Spj_s)
+      Sporo_s<-c(Sporo_s,Spj_s)  ### This is a list now
       
       ## Make GP DH using Sporo_s
       GP_DHj<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)	### !!!
