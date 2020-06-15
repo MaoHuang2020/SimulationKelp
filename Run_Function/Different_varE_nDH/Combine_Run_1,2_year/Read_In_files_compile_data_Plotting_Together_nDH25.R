@@ -5,6 +5,10 @@ setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function
 filenames <- list.files(full.names=TRUE)  
 filenames
 
+# values<-"Mean"
+# nDH<-25
+
+
 anova_list<-NULL
 
 for(values in c("Mean","Sd")){
@@ -51,9 +55,7 @@ for(values in c("Mean","Sd")){
       summarise_at(vars(Mean),              # Specify column
                    list(name = mean))    ###!!! list(meant=mean)
     
-    
-    
-    dev.set()
+    #dev.set(i)
     tiff(file=paste("nDH",nDH,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
     
     #par(mfrow=c(2,3))
@@ -65,11 +67,10 @@ for(values in c("Mean","Sd")){
       theme_bw()+
       labs(x="Year",y="SP genetic mean")+ 
       facet_grid(rows=vars(Ne),cols=vars(varE))+
-      ggtitle(paste("number of GPs:",nDH,sep=""))
-    
-    plot+scale_color_manual(breaks = c("1000.1yr", "400.1yr", "1000.2yr","400.2yr"),
+      ggtitle(paste("number of GPs:",nDH,sep=""))+
+      scale_color_manual(breaks = c("1000.1yr", "400.1yr", "1000.2yr","400.2yr"),
                             values=c("magenta2","darkturquoise","orangered", "gray17")) 
-    
+    print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
     dev.off()
     
     
