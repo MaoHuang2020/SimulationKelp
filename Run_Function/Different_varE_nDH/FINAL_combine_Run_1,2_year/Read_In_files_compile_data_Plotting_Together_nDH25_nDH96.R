@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function/Different_varE_nDH/Combine_Run_1,2_year/Output_from_bioHPC/Files_Sum")
+setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function/Different_varE_nDH/Final_combine_Run_1,2_year/Output_from_bioHPC/Files_Sum")
 
 
 filenames <- list.files(full.names=TRUE)  
@@ -50,12 +50,7 @@ for(values in c("Mean","Sd")){
     library(ggplot2)
     library(dplyr)
     
-    All.df %>%
-      group_by(SelectSP) %>%                         # Specify group indicator (TestSP/SelectSP/Year)
-      summarise_at(vars(Mean),              # Specify column
-                   list(name = mean))    ###!!! list(meant=mean)
-    
-    #dev.set(i)
+  #dev.set(i)
     tiff(file=paste("nDH",nDH,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
     
     #par(mfrow=c(2,3))
@@ -88,4 +83,32 @@ for(values in c("Mean","Sd")){
 ## how to add 2 newlines
 ## cat("\n\n", file = "tests.txt", append = TRUE)
 
+
+####
+values<-"Mean"
+nDH<-25
+
+for(values in c("Mean","Sd")){
+  for (nDH in c(25,96)){
+All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+
+All.df %>%
+  group_by(SelectSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
+summarise_at(vars(Mean),              # Specify column
+               list(name = mean))    ###!!! list(meant=mean)
+        }
+}  
+
+
+##########
+rm(list=ls())
+setwd("/Users/maohuang/Desktop/Kelp/SNP_calling/Blast_SNPs")
+GO_list<-read.csv("nearest.gene_FLK_GWAS_Output_withGO.csv",sep=",",header=T)
+  dim(GO_list)
+  head(GO_list)  
+library(MASS)  
+
+GO<-GO_list$GoTerm
+GO.freq<-table(GO)
+pie(GO.freq)
   
