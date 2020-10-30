@@ -61,6 +61,9 @@ Simul2Yr<-function(selection,nPheno,nDH,varE,Ne,nrep,cycles){
     Sporo_s<-NULL
     GP_DH<-NULL
     
+    Gameto_F<-NULL
+    Gameto_M<-NULL
+    
     for (j in 1:cycles){ 
       
       if (j<=2){
@@ -75,11 +78,15 @@ Simul2Yr<-function(selection,nPheno,nDH,varE,Ne,nrep,cycles){
         GP_F_2<-GP_F[sample(length(GP_F))]	  					 
         GP_M_2<-GP_M[sample(length(GP_M))] 					 
         
-        GP_Fs<-c(GP_F,GP_F_2)
+        GP_Fs<-c(GP_F,GP_F_2)  # make crosses for two times
         GP_Ms<-c(GP_M,GP_M_2)
         
         crossPlan<-cbind(GP_Fs,GP_Ms)
         
+        Gameto_F<-c(Gameto_F,GP_Fs)  # store the GP_Fs
+        Gameto_M<-c(Gameto_M,GP_Ms)  # store the GP_Ms
+        Gameto_Both<-c(Gameto_F,Gameto_M)
+          
         ## Cross to create 400 Spj
         Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
         Spj<-setPheno(Spj,varE=2,simParam=SP)
@@ -118,6 +125,10 @@ Simul2Yr<-function(selection,nPheno,nDH,varE,Ne,nrep,cycles){
         
         crossPlan<-cbind(GP_Fs,GP_Ms)
         
+        Gameto_F<-c(Gameto_F,GP_Fs) # store GP_Fs
+        Gameto_M<-c(Gameto_M,GP_Ms) # store GP_Ms
+        Gameto_Both<-c(Gameto_Both,Gameto_F,Gameto_M)
+        
         ## Cross to create Sporo_j
         Sporo_j<-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
         Sporo_j<-setPheno(Sporo_j,varE=2,simParam=SP)
@@ -135,25 +146,67 @@ Simul2Yr<-function(selection,nPheno,nDH,varE,Ne,nrep,cycles){
         print(j)
       }
       
-      mean_g1<-unlist(lapply(Sporo,meanG))
-      sd_g1<-sqrt(unlist(lapply(Sporo,varG)))
+      mean_g1<-unlist(lapply(Sporo,meanG))   #Sporo contains the list of Sporophytes from each year
+      sd_g1<-sqrt(unlist(lapply(Sporo,varG)))  
+      
+      
+      mean_g2F<-unlist(lapply(Gameto_F,meanG))
+      sd_g2F<-sqrt(unlist(lapply(Gemeto_F,varG)))
+      
+      mean_g2M<-unlist(lapply(Gameto_M,meanG))
+      sd_g2M<-sqrt(unlist(lapply(Gemeto_M,varG)))
+      
+      mean_g2Both<-unlist(lapply(Gameto_Both,meanG))
+      sd_g2Both<-sqrt(unlist(lapply(Gemeto_Both,varG)))
       
     }      
     
-    Mean_g_Rep[,i]<-mean_g1
-    Sd_g_Rep[,i]<-sd_g1
+    Mean_g_Rep1[,i]<-mean_g1
+    Sd_g_Rep1[,i]<-sd_g1
+    
+    Mean_g_Rep2F[,i]<-mean_g2F
+    Sd_g_Rep2F[,i]<-sd_g2F
+    
+    Mean_g_Rep2M[,i]<-mean_g2M
+    Sd_g_Rep2M[,i]<-sd_g2M
+    
+    Mean_g_Rep2Both[,i]<-mean_g2Both
+    Sd_g_Rep2Both[,i]<-sd_g2Both
     
   }
   
-  Mean_g<-rowMeans(Mean_g_Rep)
-  Sd_g<-rowMeans(Sd_g_Rep)
-  
-  Mean_Sd<-cbind(Mean_g,Sd_g)
+  Mean_g1<-rowMeans(Mean_g_Rep1)
+  Sd_g1<-rowMeans(Sd_g_Rep1)
+  Mean_Sd1<-cbind(Mean_g1,Sd_g1)
 
+  Mean_g2F<-rowMeans(Mean_g_Rep2F)
+  Sd_g2F<-rowMeans(Sd_g_Rep2F)
+  Mean_Sd2F<-cbind(Mean_g2F,Sd_g2F)
+  
+  Mean_g2M<-rowMeans(Mean_g_Rep2M)
+  Sd_g2M<-rowMeans(Sd_g_Rep2M)
+  Mean_Sd2M<-cbind(Mean_g2M,Sd_g2M)
+  
+  Mean_g2Both<-rowMeans(Mean_g_Rep2Both)
+  Sd_g2Both<-rowMeans(Sd_g_Rep2Both)
+  Mean_Sd2Both<-cbind(Mean_g2Both,Sd_g2Both)
+  
   scheme<-paste(selection,"_",nPheno,"_2yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
   
-  write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
-  write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
-  write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
+  write.csv(Mean_g_Rep1,paste(scheme,"_Mean_g.csv",sep=""))
+  write.csv(Sd_g_Rep1,paste(scheme,"_Sd_g.csv",sep=""))
+  write.csv(Mean_Sd1,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
+  
+  write.csv(Mean_g_Rep2F,paste(scheme,"_Mean_g_GPsF.csv",sep=""))
+  write.csv(Sd_g_Rep2F,paste(scheme,"_Sd_g_GPsF.csv",sep=""))
+  write.csv(Mean_Sd2F,paste(scheme,"_Mean_g_Sd_Average_GPsF.csv",sep=""))
+  
+  write.csv(Mean_g_Rep2M,paste(scheme,"_Mean_g_GPsM.csv",sep=""))
+  write.csv(Sd_g_Rep2M,paste(scheme,"_Sd_g_GPsM.csv",sep=""))
+  write.csv(Mean_Sd2M,paste(scheme,"_Mean_g_Sd_Average_GPsM.csv",sep=""))
+  
+  write.csv(Mean_g_Rep2F,paste(scheme,"_Mean_g_GPsF.csv",sep=""))
+  write.csv(Sd_g_Rep2F,paste(scheme,"_Sd_g_GPsF.csv",sep=""))
+  write.csv(Mean_Sd2F,paste(scheme,"_Mean_g_Sd_Average_GPsF.csv",sep=""))
   
 }
