@@ -35,6 +35,8 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
   Sporo_s<-NULL
   GP_DH<-NULL
   
+  Gameto_Both<-NULL
+  
   for (j in 1:cycles){
       
       if (j<=2){
@@ -53,6 +55,11 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           GP_Ms<-c(GP_M,GP_M_2)
           
           crossPlan<-cbind(GP_Fs,GP_Ms)
+          
+          ### How to subset the GP_F individuals out of the females and same for males
+          ### Then merge population 
+          #Gametos<-c(GP_Fs,GP_Ms)
+          #Gameto_Both<-c(Gameto_Both,Gametos)
           
           ## Cross to create 400 Spj
           Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
@@ -92,6 +99,9 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           
           crossPlan<-cbind(GP_Fs,GP_Ms)
           
+          Gametos<-c(GP_Fs,GP_Ms)
+          Gameto_Both<-c(Gameto_Both,Gametos)
+          
           ## Cross to create Sporo_j
           Sporo_j<-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
           Sporo_j<-setPheno(Sporo_j,varE=varE,simParam=SP)
@@ -122,8 +132,8 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 
 for (selection in c("rand","pheno")){
   for (nPheno in c(400,1000)){
-    for (nDH in c(25,96)){
-      for (varE in c(1.22,2,5.67)){
+    for (nDH in c(24,96)){
+      for (varE in c(1,4)){
         for (Ne in c(60,600)){
           
           
