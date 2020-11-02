@@ -110,8 +110,12 @@ generation[[1]]<-pop   ### cycle 0, founder pop
                  }
                  mean_g1<-unlist(lapply(Sporo,meanG))
                  sd_g1<-sqrt(unlist(lapply(Sporo,varG)))
+                 
+                 mean_g2<-unlist(lapply(GP_DH,meanG))
+                 sd_g2<-sqrt(unlist(lapply(GP_DH,varG)))
+                 
                }    
-               return(list(mean_g1=mean_g1, sd_g1=sd_g1)) 
+               return(list(mean_g1=mean_g1, sd_g1=sd_g1,mean_g2=mean_g2,sd_g2=sd_g2)) 
 }   
   
 #END runOneRep
@@ -119,8 +123,8 @@ generation[[1]]<-pop   ### cycle 0, founder pop
 
 for (selection in c("rand","pheno")){
   for (nPheno in c(400,1000)){
-    for (nDH in c(25,96)){
-      for (varE in c(1.22,2,5.67)){
+    for (nDH in c(24,96)){
+      for (varE in c(1,4)){
         for (Ne in c(60,600)){
           
           
@@ -143,20 +147,31 @@ for (selection in c("rand","pheno")){
           Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
           
           for (i in 1:nrep){
-            Mean_g_Rep[,i] <- allRep[[i]]$mean_g1
-            Sd_g_Rep[,i] <- allRep[[i]]$sd_g1
+            Mean_SP_Rep[,i] <- allRep[[i]]$mean_g1
+            Sd_SP_Rep[,i] <- allRep[[i]]$sd_g1
+            
+            Mean_GP_Rep[,i]<-allRep[[i]]$mean_g2
+            Sd_GP_Rep[,i]<-allRep[[i]]$sd_g2
           }
           
-          Mean_g<-rowMeans(Mean_g_Rep)
-          Sd_g<-rowMeans(Sd_g_Rep)
+          Mean_SP<-rowMeans(Mean_SP_Rep)
+          Sd_SP<-rowMeans(Sd_SP_Rep)
+          Mean_Sd_SP<-cbind(Mean_SP,Sd_SP)
           
-          Mean_Sd<-cbind(Mean_g,Sd_g)
+          Mean_GP<-rowMeans(Mean_GP_Rep)
+          Sd_GP<-rowMeans(Sd_GP_Rep)
+          Mean_Sd_GP<-cbind(Mean_GP,Sd_GP)
           
-          scheme<-paste0(selection,"_",nPheno,"_1yr_nDH",nDH,"_varE",varE,"_","Ne",Ne) ## !!!
+          scheme<-paste(selection,"_",nPheno,"_1yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
           
-          write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
-          write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
-          write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
+          write.csv(Mean_SP_Rep,paste(scheme,"_Mean_SP.csv",sep=""))
+          write.csv(Sd_SP_Rep,paste(scheme,"_Sd_SP.csv",sep=""))
+          write.csv(Mean_Sd_SP,paste(scheme,"_Mean_g_Sd_Average_SP.csv",sep=""))
+          
+          write.csv(Mean_GP_Rep,paste(scheme,"_Mean_GP.csv",sep=""))
+          write.csv(Sd_GP_Rep,paste(scheme,"_Sd_GP.csv",sep=""))
+          write.csv(Mean_Sd_GP,paste(scheme,"_Mean_g_Sd_Average_GP.csv",sep=""))
+          
           
         }
       }

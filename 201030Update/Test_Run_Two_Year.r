@@ -1,6 +1,5 @@
 library(parallel)
 
-
 cycles <- 7
 nrep<-100
 
@@ -35,8 +34,6 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
   Sporo_s<-NULL
   GP_DH<-NULL
   
-  Gameto_Both<-NULL
-  
   for (j in 1:cycles){
       
       if (j<=2){
@@ -56,25 +53,25 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           
           crossPlan<-cbind(GP_Fs,GP_Ms)
           
-          ### How to subset the GP_F individuals out of the females and same for males
-          ### Then merge population 
-          #Gametos<-c(GP_Fs,GP_Ms)
-          #Gameto_Both<-c(Gameto_Both,Gametos)
+          ### 
+          #How to subset the GP_F individuals out of the females and same for males
+          #Then merge population 
           
           ## Cross to create 400 Spj
           Spj<-makeCross(GP0_DH,crossPlan=crossPlan,simParam=SP)
           Spj<-setPheno(Spj,varE=varE,simParam=SP)
-          Sporo<-c(Sporo,Spj)
+          Sporo<-c(Sporo,Spj)                      #### !!! Sporo is the SP evaluation pop
           
           ## Select amongst Spj
           
-          Spj_s<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
+          Spj_s<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP) # selection, top 10%
           
           Sporo_s<-c(Sporo_s,Spj_s)
           
           ## Make GP DH using Sporo_s
-          GP_DHj<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)    ### !!!
-          GP_DH<-c(GP_DH,GP_DHj)
+          GP_DHj<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)    
+          GP_DH<-c(GP_DH,GP_DHj)     ### !!! GP_DH is the GP evaluation pop
+          GP_DH
           print(j)
           
       } else if (j>2) {
@@ -99,14 +96,11 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           
           crossPlan<-cbind(GP_Fs,GP_Ms)
           
-          Gametos<-c(GP_Fs,GP_Ms)
-          Gameto_Both<-c(Gameto_Both,Gametos)
-          
           ## Cross to create Sporo_j
           Sporo_j<-makeCross(GEBV_j,crossPlan=crossPlan,simParam=SP)
           Sporo_j<-setPheno(Sporo_j,varE=varE,simParam=SP)
           
-          Sporo<-c(Sporo,Sporo_j)
+          Sporo<-c(Sporo,Sporo_j)          ### !!! Sporo is the SP evaluation pop
           
           ## Select amongst Sporoy
           Sporo_js<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
@@ -115,16 +109,19 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           
           ## Make GP_DH_j using Sporo_s
           GP_DH_j<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)
-          GP_DH<-c(GP_DH,GP_DH_j)
+          GP_DH<-c(GP_DH,GP_DH_j)        ###!!! GP_DH is the GP evaluation pop
           print(j)
       }
       
       mean_g1<-unlist(lapply(Sporo,meanG))
       sd_g1<-sqrt(unlist(lapply(Sporo,varG)))
       
+      mean_g2<-unlist(lapply(GP_DH,meanG))
+      sd_g2<-sqrt(unlist(lapply(GP_DH,varG)))
+      
   }
   
-               return(list(mean_g1=mean_g1, sd_g1=sd_g1)) 
+        return(list(mean_g1=mean_g1, sd_g1=sd_g1,mean_g2=mean_g2,sd_g2=sd_g2)) 
 }   
   
 #END runOneRep
@@ -154,24 +151,39 @@ for (selection in c("rand","pheno")){
           
         allRep <- mclapply(1:nrep, function(dummy) {print(dummy); runOneRep(selection, nPheno, nDH, varE, Ne)},mc.cores=15)
           
-          Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
-          Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
+          Mean_SP_Rep<-matrix(nrow=cycles,ncol=nrep)
+          Sd_SP_Rep<-matrix(nrow=cycles,ncol=nrep)
+  
+          Mean_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
+          Sd_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
+          
           
           for (i in 1:nrep){
-            Mean_g_Rep[,i] <- allRep[[i]]$mean_g1
-            Sd_g_Rep[,i] <- allRep[[i]]$sd_g1
+            Mean_SP_Rep[,i] <- allRep[[i]]$mean_g1
+            Sd_SP_Rep[,i] <- allRep[[i]]$sd_g1
+            
+            Mean_GP_Rep[,i]<-allRep[[i]]$mean_g2
+            Sd_GP_Rep[,i]<-allRep[[i]]$sd_g2
           }
           
-          Mean_g<-rowMeans(Mean_g_Rep)
-          Sd_g<-rowMeans(Sd_g_Rep)
+          Mean_SP<-rowMeans(Mean_SP_Rep)
+          Sd_SP<-rowMeans(Sd_SP_Rep)
           
-          Mean_Sd<-cbind(Mean_g,Sd_g)
+          Mean_GP<-rowMeans(Mean_GP_Rep)
+          Sd_GP<-rowMeans(Sd_GP_Rep)
+          
+          Mean_Sd_SP<-cbind(Mean_SP,Sd_SP)
+          Mean_Sd_GP<-cbind(Mean_GP,Sd_GP)
           
           scheme<-paste(selection,"_",nPheno,"_2yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
           
-          write.csv(Mean_g_Rep,paste(scheme,"_Mean_g.csv",sep=""))
-          write.csv(Sd_g_Rep,paste(scheme,"_Sd_g.csv",sep=""))
-          write.csv(Mean_Sd,paste(scheme,"_Mean_g_Sd_Average.csv",sep=""))
+          write.csv(Mean_SP_Rep,paste(scheme,"_Mean_SP.csv",sep=""))
+          write.csv(Sd_SP_Rep,paste(scheme,"_Sd_SP.csv",sep=""))
+          write.csv(Mean_Sd_SP,paste(scheme,"_Mean_g_Sd_Average_SP.csv",sep=""))
+          
+          write.csv(Mean_GP_Rep,paste(scheme,"_Mean_GP.csv",sep=""))
+          write.csv(Sd_GP_Rep,paste(scheme,"_Sd_GP.csv",sep=""))
+          write.csv(Mean_Sd_GP,paste(scheme,"_Mean_g_Sd_Average_GP.csv",sep=""))
           
         }
       }
