@@ -143,8 +143,11 @@ for (selection in c("rand","pheno")){
  
          allRep <- mclapply(1:nrep, function(dummy) {print(dummy); runOneRep(selection, nPheno, nDH, varE, Ne)},mc.cores=15)
           
-          Mean_g_Rep<-matrix(nrow=cycles,ncol=nrep)
-          Sd_g_Rep<-matrix(nrow=cycles,ncol=nrep)
+         Mean_SP_Rep<-matrix(nrow=cycles,ncol=nrep)
+         Sd_SP_Rep<-matrix(nrow=cycles,ncol=nrep)
+         
+         Mean_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
+         Sd_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
           
           for (i in 1:nrep){
             Mean_SP_Rep[,i] <- allRep[[i]]$mean_g1
