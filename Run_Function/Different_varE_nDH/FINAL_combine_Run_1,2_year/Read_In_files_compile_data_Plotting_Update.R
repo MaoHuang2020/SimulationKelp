@@ -3,14 +3,16 @@
 ### read in and store in list, then merge to a table
 # 
 values<-"Sd"
-nDH<-25
-varE<-1.22
+nDH<-24
+varE<-1
 Ne<-60
 
 
 rm(list=ls())
 ls()
-setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function/Different_varE_nDH/Combine_Run_1,2_year/Output_from_bioHPC")
+#setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function/Different_varE_nDH/Combine_Run_1,2_year/Output_from_bioHPC")
+
+setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles")
 
 filenames <- list.files(full.names=TRUE)  
 filenames
@@ -19,10 +21,10 @@ Mean_SP<-NULL
 SchemePlot<-NULL
 
 for (values in c("Mean","Sd")){
-  for (nDH in c(25,96)){
-    for (varE in c(1.22,2,5.67)){
+  for (nDH in c(24,96)){
+    for (varE in c(1,4)){
       for (Ne in c(60,600)){
-        MeanSP<-filenames[grepl(paste0("nDH",nDH,"_varE",varE,"_Ne",Ne,"_",values,"_g.csv"),filenames)]
+        MeanSP<-filenames[grepl(paste0("nDH",nDH,"_varE",varE,"_Ne",Ne,"_",values,"_GP.csv"),filenames)]  ## Used GP
         SchemePlot<-paste0("nDH",nDH,"_varE",varE,"_Ne",Ne)
         MeanSP
         All1 <- lapply(MeanSP,function(i){
@@ -46,8 +48,8 @@ for (values in c("Mean","Sd")){
         select_order<-NULL
         
         for (i in 1:length(All1)){
-          Mean_SP<-c(Mean_SP,rowMeans(All1[[i]]))
-          sd_SP<-c(sd_SP,apply(All1[[i]],1, sd, na.rm = TRUE))
+          Mean_SP<-c(Mean_SP,rowMeans(All1[[i]]))  # Cal Mean
+          sd_SP<-c(sd_SP,apply(All1[[i]],1, function(x){sd(x)/sqrt(length(x))})) # Cal St_error
           select_order<-c(select_order,rep(MeanSP[i],cycles))
         }
         
@@ -57,7 +59,7 @@ for (values in c("Mean","Sd")){
         
         str(Mean_SD)
         
-        colnames(Mean_SD)<-c("Mean","SD","Selection")
+        colnames(Mean_SD)<-c("Mean","StdErr","Selection")  #StdErr
         Mean_SD[1:5,]
         tail(Mean_SD)
         
@@ -91,17 +93,18 @@ for (values in c("Mean","Sd")){
         tiff(file=paste(SchemePlot,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
         
         plot<-ggplot(Mean_SD,mapping=aes(x=Cycles,y=Mean))+
-          geom_point(aes(shape=Year))+
+          geom_point(aes(shape=TestSP))+
           
-          geom_line(aes(group=Shorten,color=interaction(TestSP,Year),linetype=SelectSP))+
+          geom_line(aes(group=Shorten,color=Year,linetype=SelectSP))+
           theme_bw()+
           labs(x="Year",y="SP genetic mean")+ 
           ggtitle(SchemePlot)
         
         ######plot+geom_segment(arrow=arrows(x0 = Cycles-0.01, y0 = Mean, x1 = Cycles+0.01, y1 = Mean+SD, angle=90,colour = "gray"))
         
-        plot+scale_color_manual(breaks = c("1000.1yr", "400.1yr", "1000.2yr","400.2yr"),
-                                values=c("magenta2","darkturquoise","orangered", "gray17")) 
+        plot+scale_color_manual(breaks = c("1yr","2yr"),
+                                values=c("orangered", "gray17")) +
+          scale_shape_manual(values=c(3,16))
         
         dev.off()
         
