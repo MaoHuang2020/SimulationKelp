@@ -7,10 +7,8 @@ filenames <- list.files(full.names=TRUE)
 filenames
 
 # values<-"Mean"
-# nDH<-25
+# nDH<-24
 
-
-anova_list<-NULL
 
 for(values in c("Mean","Sd")){
   for (nDH in c(24,96)){
@@ -46,7 +44,7 @@ for(values in c("Mean","Sd")){
     dim(All.df)
     head(All.df)
     
-    write.csv(All.df,paste0("nDH",nDH,"_All.df","_",values,".csv"))
+    #write.csv(All.df,paste0("nDH",nDH,"_All.df","_",values,".csv"))
     
     library(ggplot2)
     library(dplyr)
@@ -59,33 +57,27 @@ for(values in c("Mean","Sd")){
     ##### !!!!! Do y=Mean or Y=Sd
     
       if (values=="Mean"){
-  ylim<-c(0,8)
+  ylim<-c(-0.5,8)
   }else{
-  ylim<-c(0.5,1.5)
+  ylim<-c(0.5,1.1)
   }
-    
+
     plot<-ggplot(data=All.df,mapping=aes(x=Cycles,y=Mean))+
       geom_point(aes(shape=TestSP))+
+      ylim(ylim)+
       geom_line(aes(group=Shorten,color=Year,linetype=SelectSP))+
       theme_bw()+
       labs(x="Year",y="GP genetic mean")+ 
       facet_grid(rows=vars(Ne),cols=vars(varE))+
       ggtitle(paste("number of GPs:",nDH,sep=""))+
       scale_color_manual(breaks = c("1yr","2yr"),values=c("orangered", "gray17"))+
-      scale_shape_manual(values=c(3,16)) 
+      scale_shape_manual(values=c(3,16))
+
     print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
     dev.off()
  
  #### Add stderr bar   
-    
-    All.df<-na.omit(All.df)
-    
-    lmm<-lm(Mean~SelectSP+as.factor(TestSP)+Year+as.factor(Ne)+as.factor(varE),data=All.df)
-    anova_test<-anova(lmm)
-    anova_test
-    cat("Anova Test\n", file = paste0("ANOVA_nDH",nDH,"_",values,".txt"), append = TRUE)
-    # This add "Anova Test into the file in the first line
-    capture.output(anova_test, file = paste0("ANOVA_nDH",nDH,"_",values,".txt"), append = TRUE)
+   #geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))+ 
   }
 }
 
@@ -93,20 +85,41 @@ for(values in c("Mean","Sd")){
 ## cat("\n\n", file = "tests.txt", append = TRUE)
 
 
-####
-values<-"Mean"
-nDH<-24
+#### Conducting ANOVA
+setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP/Plots_ANOVA")
+#values<-"Mean"
+#nDH<-24
 
+All_2nDH<-NULL
 for(values in c("Mean","Sd")){
-  for (nDH in c(25,96)){
+  for (nDH in c(24,96)){
+
 All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
 
-All.df %>%
-  group_by(SelectSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
-summarise_at(vars(Mean),              # Specify column
-               list(name = mean))    ###!!! list(meant=mean)
-        }
+# All.df %>%
+#   group_by(SelectSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
+# summarise_at(vars(Mean),              # Specify column
+#                list(name = mean))    ###!!! list(meant=mean)
+
+All_2nDH<-rbind(All_2nDH,All.df)
+  }
+ # ANOVA under each Ne and varE combination, split All_2nDH into Ne and varE combinations
+  All_2nDH<-na.omit(All_2nDH)
+  All_split<-All_2nDH %>%
+    split(list(All_2nDH$Ne,All_2nDH$varE))   
+ for (i in 1:length(All_split)){
+   for (col in c("SelectSP","TestSP","Year","nDH")){
+     All_split[[i]][,col]<-as.factor(All_split[[i]][,col])
+   }
+   lmm<-lm(Mean~SelectSP+TestSP+Year+nDH+SelectSP*TestSP+SelectSP*Year+SelectSP*nDH+TestSP*Year+TestSP*nDH+Year*nDH,data=All_split[[i]])
+   anova_test<-anova(lmm)
+   anova_test
+   cat("Anova Test\n", file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+   # This add "Anova Test into the file in the first line
+   capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+  }   
 }  
+
 
 
 ##########

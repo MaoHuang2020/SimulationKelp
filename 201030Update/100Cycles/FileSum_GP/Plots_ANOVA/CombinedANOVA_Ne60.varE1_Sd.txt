@@ -1,0 +1,18 @@
+Anova Test
+Analysis of Variance Table
+
+Response: Mean
+                 Df Sum Sq Mean Sq F value    Pr(>F)    
+SelectSP          1  21.74 21.7385 14.2380 0.0002088 ***
+TestSP            1   0.59  0.5910  0.3871 0.5344876    
+Year              1   6.34  6.3354  4.1495 0.0428846 *  
+nDH               1   4.24  4.2385  2.7761 0.0971532 .  
+SelectSP:TestSP   1   0.01  0.0120  0.0078 0.9295033    
+SelectSP:Year     1   0.26  0.2634  0.1725 0.6783298    
+SelectSP:nDH      1   0.21  0.2051  0.1343 0.7143679    
+TestSP:Year       1   0.03  0.0302  0.0198 0.8882198    
+TestSP:nDH        1   0.05  0.0549  0.0360 0.8497970    
+Year:nDH          1   0.19  0.1852  0.1213 0.7279787    
+Residuals       213 325.21  1.5268                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
