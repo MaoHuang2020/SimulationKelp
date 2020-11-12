@@ -49,7 +49,8 @@ for(values in c("Mean","Sd")){
     library(ggplot2)
     library(dplyr)
     
-    All.df$TestSP<-as.factor(All.df$TestSP)
+    All.df$NumPlots<-as.factor(All.df$TestSP) # changed the names
+    All.df$CycleTime<-as.factor(All.df$Year)  # changed the names
   #dev.set(i)
     tiff(file=paste("nDH",nDH,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
     
@@ -63,9 +64,9 @@ for(values in c("Mean","Sd")){
   }
 
     plot<-ggplot(data=All.df,mapping=aes(x=Cycles,y=Mean))+
-      geom_point(aes(shape=TestSP))+
+      geom_point(aes(shape=NumPlots))+
       ylim(ylim)+
-      geom_line(aes(group=Shorten,color=Year,linetype=SelectSP))+
+      geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP))+
       theme_bw()+
       labs(x="Year",y="GP genetic mean")+ 
       facet_grid(rows=vars(Ne),cols=vars(varE))+
