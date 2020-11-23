@@ -97,10 +97,6 @@ for(values in c("Mean","Sd")){
 
 All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
 
-# All.df %>%
-#   group_by(SelectSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
-# summarise_at(vars(Mean),              # Specify column
-#                list(name = mean))    ###!!! list(meant=mean)
 
 All_2nDH<-rbind(All_2nDH,All.df)
   }
@@ -120,6 +116,60 @@ All_2nDH<-rbind(All_2nDH,All.df)
    capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
   }   
 }  
+
+
+
+### calculate the % change across senarios
+library(dplyr)
+
+MeanLS<-NULL
+for(values in c("Mean","Sd")){
+  for (nDH in c(24,96)){
+  All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+    
+   Means<-All.df %>% group_by(Year) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
+      summarise_at(vars(Mean),              # Specify column
+                list(name = mean))    ###!!! list(meant=mean)
+   Means<-as.data.frame(Means)
+
+   MeanSave<-as.data.frame(Means[,2])
+   rownames(MeanSave)<-Means[,1]  # 1st value is pheno/400, 2nd value is rand/1000
+   colnames(MeanSave)<-paste0(values,"_nDH",nDH)
+   MeanLS<-c(MeanLS,MeanSave)
+  }
+}  
+
+## SelectSP
+#1st value is pheno, 2nd value is rand
+print((MeanLS$Mean_nDH96[1]-MeanLS$Mean_nDH96[2])/MeanLS$Mean_nDH96[2])
+## SelectSP
+#1st value is 400, 2nd value is 1000
+print((MeanLS$Mean_nDH96[2]-MeanLS$Mean_nDH96[1])/MeanLS$Mean_nDH96[1])
+print((MeanLS$Mean_nDH24[2]-MeanLS$Mean_nDH24[1])/MeanLS$Mean_nDH24[1])
+## Year
+# 1st value is 1yr, 2nd value is 2yr
+print((MeanLS$Mean_nDH96[1]-MeanLS$Mean_nDH96[2])/MeanLS$Mean_nDH96[2])
+print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
+
+
+## SelectSP, 
+#nDH96  0.72
+#nDH24  1.55
+## TestSP
+#nDH96 0.13
+#nDH24 0.08
+## Year
+#nDH96 0.46
+#nDH24 0.46
+
+# MeanLS
+## 1st value is pheno, 2nd value is rand
+#$Mean_nDH24
+#[1] 1.9293656 0.7565552
+
+#$Mean_nDH96
+#[1] 2.320251 1.352602
+
 
 
 
