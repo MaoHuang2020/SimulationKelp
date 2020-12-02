@@ -1,7 +1,7 @@
 rm(list=ls())
 #setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/Run_Function/Different_varE_nDH/Final_combine_Run_1,2_year/Output_from_bioHPC/Files_Sum")
 
-setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP")
+setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP/Input")
 
 filenames <- list.files(full.names=TRUE)  
 filenames
@@ -11,8 +11,9 @@ filenames
 
 
 for(values in c("Mean","Sd")){
-  for (nDH in c(24,96)){
-    SumFile<-filenames[grepl(paste0("nDH",nDH),filenames)]
+  #for (nDH in c(24,96)){ #different nGP/nDH
+  #  SumFile<-filenames[grepl(paste0("nDH",nDH),filenames)]
+    SumFile<-filenames
     MeanFile<-SumFile[grep(paste0(values,".csv"),SumFile)]
     
     All <- lapply(MeanFile,function(i){
@@ -36,43 +37,49 @@ for(values in c("Mean","Sd")){
     
     head(StringSplit)
     dim(StringSplit)
-    All.df$nDH<-StringSplit[,4]
+    All.df$nGP<-StringSplit[,4]  # Add this nGP level
     
     All.df$Ne<-StringSplit[,6]
     All.df$varE<-StringSplit[,5]
     
     dim(All.df)
     head(All.df)
-    
+
     #write.csv(All.df,paste0("nDH",nDH,"_All.df","_",values,".csv"))
     
     library(ggplot2)
     library(dplyr)
     
-    All.df$NumPlots<-as.factor(All.df$TestSP) # changed the names
-    All.df$CycleTime<-as.factor(All.df$Year)  # changed the names
+    All.df$NumPlots<-as.factor(All.df$TestSP) # changed the names TestSP to "NumPlots"
+    All.df$CycleTime<-as.factor(All.df$Year)  # changed the names "Year" to "CycleTime"
   #dev.set(i)
-    tiff(file=paste("nDH",nDH,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
+    All.df0<-All.df
+  for (NumPlots in c(400, 1000)){
+ 
+    tiff(file=paste("NumPlots",NumPlots,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
     
     #par(mfrow=c(2,3))
     ##### !!!!! Do y=Mean or Y=Sd
     
       if (values=="Mean"){
-  ylim<-c(-0.5,8)
+  ylim<-c(-0.5,7)
   }else{
   ylim<-c(0.5,1.1)
   }
 
+    All.df<-droplevels(All.df0[which(All.df0$NumPlots==NumPlots),])
+    
     plot<-ggplot(data=All.df,mapping=aes(x=Cycles,y=Mean))+
-      geom_point(aes(shape=NumPlots))+
-      ylim(ylim)+
-      geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP))+
+      geom_point(aes(shape=nGP))+
+      geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP)) +
       theme_bw()+
       labs(x="Year",y="GP genetic mean")+ 
       facet_grid(rows=vars(Ne),cols=vars(varE))+
-      ggtitle(paste("number of GPs:",nDH,sep=""))+
+      ylim(ylim)+
+      ggtitle(paste("number of Plots:",NumPlots,sep=""))+
       scale_color_manual(breaks = c("1yr","2yr"),values=c("orangered", "gray17"))+
       scale_shape_manual(values=c(3,16))
+    
 
     print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
     dev.off()
