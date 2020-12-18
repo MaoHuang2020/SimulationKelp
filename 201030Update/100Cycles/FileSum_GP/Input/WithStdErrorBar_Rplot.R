@@ -194,7 +194,7 @@ for(values in c("Mean","Sd")){
 setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP/Plots_ANOVA")
 #values<-"Mean"
 #nDH<-24
-
+library(plyr)
 All_2nDH<-NULL
 for(values in c("Mean","Sd")){
   for (nDH in c(24,96)){
@@ -206,18 +206,21 @@ All_2nDH<-rbind(All_2nDH,All.df)
   }
  # ANOVA under each Ne and varE combination, split All_2nDH into Ne and varE combinations
   All_2nDH<-na.omit(All_2nDH)
-  All_split<-All_2nDH %>%
-    split(list(All_2nDH$Ne,All_2nDH$varE))   
+  All_split<-split(x=All_2nDH,f=list(All_2nDH$Ne,All_2nDH$varE))   
+  
  for (i in 1:length(All_split)){
    for (col in c("SelectSP","TestSP","Year","nDH")){
      All_split[[i]][,col]<-as.factor(All_split[[i]][,col])
+     
+     print(t.test(All_split[[i]]$Mean[All_split[[i]]$TestSP==1000],All_split[[i]]$Mean[All_split[[i]]$TestSP==400]),paired=FALSE)
+     
    }
    lmm<-lm(Mean~SelectSP+TestSP+Year+nDH+SelectSP*TestSP+SelectSP*Year+SelectSP*nDH+TestSP*Year+TestSP*nDH+Year*nDH,data=All_split[[i]])
    anova_test<-anova(lmm)
-   anova_test
-   cat("Anova Test\n", file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
-   # This add "Anova Test into the file in the first line
-   capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+   print(anova_test)
+   #cat("Anova Test\n", file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+   ## This add "Anova Test into the file in the first line
+   # capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
   }   
 }  
 
@@ -282,6 +285,46 @@ print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
 #[1] 2.320251 1.352602
 
 
+#### Adding in plot, x-axis on the 5-generation end Gain from each scheme; y-axis on the 5-generation end Genetic Variance from each scheme
+
+values<-"Mean"
+tmp<-NULL
+names<-NULL
+  for (nDH in c(24,96)){
+    All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+    
+    tmp<-c(tmp,All.df$Mean[All.df$Cycles==7])
+    names<-c(names,as.character(All.df$Shorten[All.df$Cycles==7]))
+  }
+X<-tmp
+names(X)<-names
+
+values<-"Sd"
+tmp<-NULL
+names<-NULL
+for (nDH in c(24,96)){
+  All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+  
+  tmp<-c(tmp,All.df$Mean[All.df$Cycles==7])
+  names<-c(names,as.character(All.df$Shorten[All.df$Cycles==7]))
+}
+Y<-tmp
+names(Y)<-names
+
+library(stringr)
+identical(str_split_fixed(names(X),"_",7)[1:6],str_split_fixed(names(Y),"_",7)[1:6]) # TRUE=same treatment order
+dataf<-data.frame(X,Y)
+
+tiff(file=paste("Figure4.tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
+
+library(ggplot2)
+plot<-ggplot(data=dataf,mapping=aes(x=X,y=Y))+
+  geom_point()+
+  labs(x="Genetic gain",y="Genetic variance")+
+  theme_bw()
+
+print(plot) 
+dev.off()
 
 
 ##########
