@@ -10,6 +10,7 @@ filenames
 # nDH<-24
 
 #### Split plots in nDH/nGP
+#### Figure 2 (Mean) and 3 (Sd)
 
 for(values in c("Mean","Sd")){
   for (nDH in c(24,96)){ #different nGP/nDH
@@ -191,12 +192,16 @@ for(values in c("Mean","Sd")){
 
 
 #### Conducting ANOVA
+#### Table 1 and Supplemental Table 1
+rm(list=ls())
 setwd("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP/Plots_ANOVA")
 #values<-"Mean"
 #nDH<-24
 library(plyr)
-All_2nDH<-NULL
+
 for(values in c("Mean","Sd")){
+  
+  All_2nDH<-NULL  ## cannot be outside the loop !!
   for (nDH in c(24,96)){
 
 All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
@@ -215,12 +220,13 @@ All_2nDH<-rbind(All_2nDH,All.df)
      print(t.test(All_split[[i]]$Mean[All_split[[i]]$TestSP==1000],All_split[[i]]$Mean[All_split[[i]]$TestSP==400]),paired=FALSE)
      
    }
+   print(unique(paste0(All_split[[i]]$Ne,"_",All_split[[i]]$varE)))
    lmm<-lm(Mean~SelectSP+TestSP+Year+nDH+SelectSP*TestSP+SelectSP*Year+SelectSP*nDH+TestSP*Year+TestSP*nDH+Year*nDH,data=All_split[[i]])
    anova_test<-anova(lmm)
    print(anova_test)
-   #cat("Anova Test\n", file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+   cat("Anova Test\n", file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
    ## This add "Anova Test into the file in the first line
-   # capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
+   capture.output(anova_test, file = paste0("CombinedANOVA_",names(All_split)[i],"_",values,".txt"), append = TRUE)
   }   
 }  
 
@@ -286,6 +292,7 @@ print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
 
 
 #### Adding in plot, x-axis on the 5-generation end Gain from each scheme; y-axis on the 5-generation end Genetic Variance from each scheme
+#### Figure 4
 
 values<-"Mean"
 tmp<-NULL
