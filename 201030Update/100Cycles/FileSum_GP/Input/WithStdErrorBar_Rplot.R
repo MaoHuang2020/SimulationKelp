@@ -13,6 +13,9 @@ filenames
 #### Figure 2 (Mean) and 3 (Sd)
 
 for(values in c("Mean","Sd")){
+  
+  ylab<-ifelse(values=="Mean","GP Genetic Mean","GP Genetic Variance")
+  
   for (nDH in c(24,96)){ #different nGP/nDH
   SumFile<-filenames[grepl(paste0("nDH",nDH),filenames)]
   
@@ -81,18 +84,19 @@ for(values in c("Mean","Sd")){
       geom_point(aes(shape=NumPlots))+
       geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP)) +
       theme_bw()+
-      labs(x="Year",y="GP genetic mean")+ 
+      theme(panel.grid.major.x=element_blank(),panel.grid.minor = element_blank(),panel.border = element_rect(colour = "black"))+
+      labs(x="Year",y=ylab)+ 
       facet_grid(rows=vars(Ne),cols=vars(varE))+
       ylim(ylim)+
       ggtitle(paste("Number of GPs:",nDH,sep=""))+
       scale_color_manual(breaks = c("1yr","2yr"),values=c("orangered", "gray17"))+
-      scale_shape_manual(values=c(3,16))+
-    geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))
-    
+      scale_shape_manual(values=c(3,16))
     print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
     dev.off()
     
-    #### Add stderr bar   
+    #### Add stderr bar  +
+    #geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))
+    #strip.background = element_rect(colour="white", fill="white"),
     #
   }
 }
@@ -235,22 +239,39 @@ All_2nDH<-rbind(All_2nDH,All.df)
 ### calculate the % change across senarios
 library(dplyr)
 
+### Changed this to average across nDH, but just each scenario (Dec 22nd, 2020)
+### 
 MeanLS<-NULL
 for(values in c("Mean","Sd")){
+  All.df<-NULL
   for (nDH in c(24,96)){
-  All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
-    
-   Means<-All.df %>% group_by(SelectSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
+  tmp<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+  All.df<-rbind(All.df,tmp)  
+  }
+   Means<-All.df %>% group_by(nDH) %>%                        # Specify group indicator (SelectSP/Year/TestSP)
       summarise_at(vars(Mean),              # Specify column
                 list(name = mean))    ###!!! list(meant=mean)
    Means<-as.data.frame(Means)
 
-   MeanSave<-as.data.frame(Means[,2])
-   rownames(MeanSave)<-Means[,1]  # 1st value is pheno/400, 2nd value is rand/1000
-   colnames(MeanSave)<-paste0(values,"_nDH",nDH)
-   MeanLS<-c(MeanLS,MeanSave)
-  }
+  # MeanSave<-as.data.frame(Means[,2])
+  # rownames(MeanSave)<-Means[,1]  # 1st value is pheno/400, 2nd value is rand/1000
+  # colnames(MeanSave)<-paste0(values) #"_nDH",nDH
+  # MeanLS<-c(MeanLS,MeanSave)
+  #}
+  
 }  
+
+
+
+
+### OR do
+aggregate(All.df[,2],list(All.df$SelectSP),mean)
+
+print((MeanLS$Mean[1]-MeanLS$Mean[2])/MeanLS$Mean[2])
+#SelectSP (pheno-rand)/rand    #1.014842
+#Year (Means[Means$Year=="1yr",2]-Means[Means$Year=="2yr",2])/Means[Means$Year=="2yr",2]  #0.4540391
+#TestSP (Means[Means$TestSP==1000,2]-Means[Means$TestSP==400,2])/Means[Means$TestSP==400,2] #0.1054314
+
 
 #Mean(nDH24)
 # 1.34296
@@ -259,8 +280,8 @@ for(values in c("Mean","Sd")){
 
 ## SelectSP
 #1st value is pheno, 2nd value is rand
-print((MeanLS$Mean_nDH96[1]-MeanLS$Mean_nDH96[2])/MeanLS$Mean_nDH96[2])
 print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
+print((MeanLS$Mean_nDH96[1]-MeanLS$Mean_nDH96[2])/MeanLS$Mean_nDH96[2])
 
 ## SelectSP
 #1st value is 400, 2nd value is 1000
@@ -331,6 +352,47 @@ plot<-ggplot(data=dataf,mapping=aes(x=X,y=Y))+
   theme_bw()
 
 print(plot) 
+dev.off()
+
+head(dataf)
+colnames(dataf)[1]<-"Mean"
+colnames(dataf)[2]<-"Sd"
+dataf$SelectSP<-str_split_fixed(rownames(dataf),"_",7)[,1]
+dataf$NumPlots<-str_split_fixed(rownames(dataf),"_",7)[,2]
+dataf$Year<-str_split_fixed(rownames(dataf),"_",7)[,3]
+dataf$nGP<-str_split_fixed(rownames(dataf),"_",7)[,4]
+dataf$varE<-str_split_fixed(rownames(dataf),"_",7)[,5]
+dataf$Ne<-str_split_fixed(rownames(dataf),"_",7)[,6]
+
+# install.packages("reshape2")
+# library("reshape2")
+# dataf_long<-melt(dataf,id.vars=c("varE","Ne"))
+write.csv(dataf_long,"dataf_FinalGain_Variance.csv")
+
+#### Figure 4 JL version Dec 22, 2020
+library(tidyverse)
+gainSD <- read.csv("/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/201030Update/100Cycles/FileSum_GP/Plots_ANOVA/dataf_FinalGain_Variance.csv",sep=",",header=T)
+
+colnames(gainSD)[1] <- "Name"
+gainSD <- gainSD[order(gainSD$varE, gainSD$Ne),]
+plot(gainSD$Mean, gainSD$Sd, pch=16)
+
+pdf("gainSDbyInterventionLines.pdf", height=8, width=8)
+op <- par(mfrow=c(2,2))
+for (f in 4:7){
+  sb <- (4:7)[-(f-3)]
+  print(c(sb, f))
+  gainSD <- gainSD[order(gainSD[,8], gainSD[,9], gainSD[,sb[1]], gainSD[,sb[2]], gainSD[,sb[3]], gainSD[,f]),]
+  print(gainSD)
+  curNxt <- c(2, 1, 2, 1)[f-3]
+  mainTitle <- c("Selection on SP", "Number of Plots Eval.", "Cycle Time in Years", "nGP per Parental SP")[f-3]
+  plot(gainSD$Mean, gainSD$Sd, pch=16, col=rep(curNxt:(3-curNxt), 32), xlab="Final Genetic Mean", ylab="Final Genetic Variance", main=mainTitle)
+  for (i in 0:31){
+    lines(gainSD$Mean[i*2 + 1:2], gainSD$Sd[i*2 + 1:2], lwd=0.5, col="gray")
+  }
+    #text(6.6, 0.93, labels=c("A", "B", "C", "D")[f-3], cex=1.5)
+}
+
 dev.off()
 
 
