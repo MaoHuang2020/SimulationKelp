@@ -1,7 +1,7 @@
 library(parallel)
 
-cycles <- 7
-nrep<-100
+cycles <- 10
+nrep<-1
 
 runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 
@@ -13,7 +13,7 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
   SP<-SimParam$new(founderPop)
   SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
   SP$addSnpChip(nSnpPerChr=nSnpPerChr)
-  SP$setGender("yes_sys")
+  SP$setSexes("yes_sys")
   SP$setTrackRec(TRUE)
   
   pop <- newPop(founderPop, simParam=SP)
@@ -43,8 +43,8 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
       if (j<=2){
           ## Year 2, the same scheme as in Year 1
           ## Randomly select 200 as female, then randomly select another 200 as male
-          females<-selectInd(pop=GP0_DH,gender="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
-          males<-selectInd(pop=GP0_DH,gender="M",nInd=n_gp,trait=1,use="rand",simParam=SP)
+          females<-selectInd(pop=GP0_DH,sex="F",nInd=n_gp,trait=1,use="rand",simParam=SP)
+          males<-selectInd(pop=GP0_DH,sex="M",nInd=n_gp,trait=1,use="rand",simParam=SP)
           
           GP_F<-row.names(pullQtlGeno(females,simParam=SP))
           GP_M<-row.names(pullQtlGeno(males,simParam=SP))
@@ -72,6 +72,19 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           
           Sporo_s<-c(Sporo_s,Spj_s)
           
+          ## Selection Intensity on Sporo[[j]]
+          selectpop<-Spj_s@id
+          Refpop<-data.frame(Sporo[[j]]@id,Sporo[[j]]@pheno,Sporo[[j]]@mother,Sporo[[j]]@father)  # select on pheno
+          
+          ## Pull out selectInd, estimate the selection intensity 
+          colnames(Refpop)[1:2]<-c("id","trait")
+          Refpop$id<-as.character(Refpop$id)
+          Refpop$mean<-Refpop$trait/sd(Refpop$trait)
+          selectPopmean<-mean(Refpop[Refpop$id%in%selectpop,]$mean)
+          selectInt<-selectPopmean-mean(Refpop$mean)
+          
+        SPselInt<-c(SPselInt,selectInt) 
+          
           ## Make GP DH using Sporo_s
           GP_DHj<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)    
           GP_DH<-c(GP_DH,GP_DHj)     ### !!! GP_DH is the GP evaluation pop
@@ -86,8 +99,23 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           ## GEBVs on GP(y-2)s
           GEBV_j<-setEBV(GP_DH[[j-2]],GS_j,simParam=SP)  ### Use the GP_DH two years ago
           
-          females<-selectInd(pop=GEBV_j,gender="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
-          males<-selectInd(pop=GEBV_j,gender="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
+          ## GS cor. TRUE BVs= genetic values
+          GScor<-c(GScor,cor(gv(GEBV_j),ebv(GEBV_j)))
+          
+          females<-selectInd(pop=GEBV_j,sex="F",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
+          males<-selectInd(pop=GEBV_j,sex="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
+          
+          ## Selection intensity on FG and MGs
+          selectpop<-c(females@id,males@id)
+          
+          Refpop<-data.frame(GEBV_j@id,GEBV_j@ebv,GEBV_j@mother,GEBV_j@father)
+          ## Pull out selectInd, estimate the selection intensity 
+          colnames(Refpop)[1:2]<-c("id","trait")
+          Refpop$mean<-Refpop$trait/sd(Refpop$trait)
+          selectPopmean<-mean(Refpop[Refpop$id%in%selectpop,]$mean)
+          selectInt<-selectPopmean-mean(Refpop$mean)
+        GPselInt<-c(GPselInt,selectInt) 
+          
           
           GP_F<-row.names(pullQtlGeno(females,simParam=SP))
           GP_M<-row.names(pullQtlGeno(males,simParam=SP))
@@ -110,6 +138,19 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           Sporo_js<-selectInd(Sporo[[j]],nInd=nPheno*0.1,trait=1,use=selection,simParam=SP)
           
           Sporo_s<-c(Sporo_s,Sporo_js)
+          
+          ## Selection intensity on Sporo[[j]]
+          selectpop<-Sporo_js@id
+          Refpop<-data.frame(Sporo[[j]]@id,Sporo[[j]]@pheno,Sporo[[j]]@mother,Sporo[[j]]@father)  # select on pheno
+          
+          ## Pull out selectInd, estimate the selection intensity 
+          colnames(Refpop)[1:2]<-c("id","trait")
+          Refpop$id<-as.character(Refpop$id)
+          Refpop$mean<-Refpop$trait/sd(Refpop$trait)
+          selectPopmean<-mean(Refpop[Refpop$id%in%selectpop,]$mean)
+          selectInt<-selectPopmean-mean(Refpop$mean)
+          
+        SPselInt<-c(SPselInt,selectInt) 
           
           ## Make GP_DH_j using Sporo_s
           GP_DH_j<-makeDH(Sporo_s[[j]],nDH=nDH,simParam=SP)
@@ -161,6 +202,8 @@ for (selection in c("rand","pheno")){
           Mean_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
           Sd_GP_Rep<-matrix(nrow=cycles,ncol=nrep)
           
+          GPselInt_Rep<-matrix(nrow=cycles-2,ncol=nrep)  #starts from 3rd cycle
+          SPselInt_Rep<-matrix(nrow=cycles,ncol=nrep) 
           
           for (i in 1:nrep){
             Mean_SP_Rep[,i] <- allRep[[i]]$mean_g1
@@ -168,6 +211,9 @@ for (selection in c("rand","pheno")){
             
             Mean_GP_Rep[,i]<-allRep[[i]]$mean_g2
             Sd_GP_Rep[,i]<-allRep[[i]]$sd_g2
+            
+            GPselInt_Rep[,i]<-allRep[[i]]$GPselInt
+            SPselInt_Rep[,i]<-allRep[[i]]$SPselInt
           }
           
           Mean_SP<-rowMeans(Mean_SP_Rep)
@@ -179,6 +225,9 @@ for (selection in c("rand","pheno")){
           Mean_Sd_SP<-cbind(Mean_SP,Sd_SP)
           Mean_Sd_GP<-cbind(Mean_GP,Sd_GP)
           
+          GPselInt_Rep<-rowMeans(GPselInt_Rep)
+          SPselInt_Rep<-rowMeans(SPselInt_Rep)
+          
           scheme<-paste(selection,"_",nPheno,"_2yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
           
           write.csv(Mean_SP_Rep,paste(scheme,"_Mean_SP.csv",sep=""))
@@ -188,6 +237,9 @@ for (selection in c("rand","pheno")){
           write.csv(Mean_GP_Rep,paste(scheme,"_Mean_GP.csv",sep=""))
           write.csv(Sd_GP_Rep,paste(scheme,"_Sd_GP.csv",sep=""))
           write.csv(Mean_Sd_GP,paste(scheme,"_Mean_g_Sd_Average_GP.csv",sep=""))
+          
+          write.csv(GPselInt_Rep,paste(scheme,"_GPselInt.csv",sep=""))
+          write.csv(SPselInt_Rep,paste(scheme,"_SPselInt.csv",sep=""))
           
         }
       }
