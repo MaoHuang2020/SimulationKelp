@@ -1,12 +1,12 @@
 library(parallel)
 
 
-cycles <- 10
-nrep<-20
+cycles <- 4
+nrep<-1
 
 runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 
-  library(AlphaSimR)
+  library(AlphaSimR)\
   n_gp<-nPheno/2
   founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
   # Founder Pop should be here
@@ -159,7 +159,7 @@ generation[[1]]<-pop   ### cycle 0, founder pop
                  sd_g2<-sqrt(unlist(lapply(GP_DH,varG)))
                  
                }    
-               return(list(mean_g1=mean_g1, sd_g1=sd_g1,mean_g2=mean_g2,sd_g2=sd_g2,GPselInt=GPselInt,SPselInt=SPselInt)) 
+               return(list(mean_g1=mean_g1, sd_g1=sd_g1,mean_g2=mean_g2,sd_g2=sd_g2,GPselInt=GPselInt,SPselInt=SPselInt,GScor=GScor)) 
 }   
   
 #END runOneRep
@@ -195,6 +195,8 @@ for (selection in c("rand","pheno")){
          GPselInt_Rep<-matrix(nrow=cycles-2,ncol=nrep)  
          SPselInt_Rep<-matrix(nrow=cycles,ncol=nrep)  
          
+         GScor_Rep<-matrix(nrow=cycles-2,ncol=nrep)
+         
           for (i in 1:nrep){
             Mean_SP_Rep[,i] <- allRep[[i]]$mean_g1
             Sd_SP_Rep[,i] <- allRep[[i]]$sd_g1
@@ -204,6 +206,8 @@ for (selection in c("rand","pheno")){
             
             GPselInt_Rep[,i]<-allRep[[i]]$GPselInt
             SPselInt_Rep[,i]<-allRep[[i]]$SPselInt
+            
+            GScor_Rep[,i]<-allRep[[i]]$GScor
           }
           
           Mean_SP<-rowMeans(Mean_SP_Rep)
@@ -214,8 +218,10 @@ for (selection in c("rand","pheno")){
           Sd_GP<-rowMeans(Sd_GP_Rep)
           Mean_Sd_GP<-cbind(Mean_GP,Sd_GP)
           
-          GPselInt_Rep<-rowMeans(GPselInt_Rep)
-          SPselInt_Rep<-rowMeans(SPselInt_Rep)
+          GPselInt_all<-rowMeans(GPselInt_Rep)
+          SPselInt_all<-rowMeans(SPselInt_Rep)
+          
+          GScor_all<-rowMeans(GScor_Rep)
           
           scheme<-paste(selection,"_",nPheno,"_1yr_nDH",nDH,"_varE",varE,"_","Ne",Ne,sep="") ## !!!
           
@@ -227,8 +233,15 @@ for (selection in c("rand","pheno")){
           write.csv(Sd_GP_Rep,paste(scheme,"_Sd_GP.csv",sep=""))
           write.csv(Mean_Sd_GP,paste(scheme,"_Mean_g_Sd_Average_GP.csv",sep=""))
           
-          write.csv(GPselInt_Rep,paste(scheme,"_GPselInt.csv",sep=""))
-          write.csv(SPselInt_Rep,paste(scheme,"_SPselInt.csv",sep=""))
+          
+          write.csv(GPselInt_Rep,paste(scheme,"_GPselInt_Reps.csv",sep=""))
+          write.csv(GPselInt_all,paste(scheme,"_GPselInt.csv",sep=""))
+          
+          write.csv(SPselInt_Rep,paste(scheme,"_SPselInt_Reps.csv",sep=""))
+          write.csv(SPselInt_all,paste(scheme,"_SPselInt.csv",sep=""))
+          
+          write.csv(GScor_Rep,paste(scheme,"_GPcor_Reps.csv",sep=""))
+          write.csv(GScor_all,paste(scheme,"_GPcor.csv",sep=""))
           
         }
       }
