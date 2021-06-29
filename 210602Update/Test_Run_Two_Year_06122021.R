@@ -1,7 +1,7 @@
 library(parallel)
 
-cycles <- 4
-nrep<-1
+cycles <- 10
+nrep<-20
 
 runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 

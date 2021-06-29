@@ -1,12 +1,12 @@
 library(parallel)
 
 
-cycles <- 4
-nrep<-1
+cycles <- 10
+nrep<-20
 
 runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 
-  library(AlphaSimR)\
+  library(AlphaSimR)
   n_gp<-nPheno/2
   founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
   # Founder Pop should be here
