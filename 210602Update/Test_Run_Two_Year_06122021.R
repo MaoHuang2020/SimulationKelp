@@ -105,7 +105,7 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
           males<-selectInd(pop=GEBV_j,sex="M",nInd=n_gp,selectTop=TRUE,trait=1,use="ebv",simParam=SP)
           
           ## Selection intensity on FG and MGs
-          selectpop<-c(females@id,males@id)
+          selectpop<-c(females@id,males@id)  #400 or 1000
           
           Refpop<-data.frame(GEBV_j@id,GEBV_j@ebv,GEBV_j@mother,GEBV_j@father)
           ## Pull out selectInd, estimate the selection intensity 

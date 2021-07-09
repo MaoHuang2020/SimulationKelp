@@ -1,0 +1,18 @@
+Anova Test
+Analysis of Variance Table
+
+Response: Mean
+                   Df   Sum Sq  Mean Sq  F value    Pr(>F)    
+SelectSP            1 0.056875 0.056875 159.3191 < 2.2e-16 ***
+NumCross            1 0.117212 0.117212 328.3332 < 2.2e-16 ***
+CycleTime           1 0.002650 0.002650   7.4241 0.0079615 ** 
+nGP                 1 0.003873 0.003873  10.8480 0.0014958 ** 
+SelectSP:NumCross   1 0.004301 0.004301  12.0474 0.0008534 ***
+SelectSP:CycleTime  1 0.000044 0.000044   0.1240 0.7256532    
+SelectSP:nGP        1 0.000042 0.000042   0.1164 0.7338949    
+NumCross:CycleTime  1 0.003646 0.003646  10.2127 0.0020231 ** 
+NumCross:nGP        1 0.001142 0.001142   3.2000 0.0775710 .  
+CycleTime:nGP       1 0.000114 0.000114   0.3186 0.5740758    
+Residuals          77 0.027488 0.000357                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
