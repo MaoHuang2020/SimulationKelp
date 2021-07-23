@@ -396,15 +396,104 @@ for (f in 4:7){
 dev.off()
 
 
-##########
-rm(list=ls())
-setwd("/Users/maohuang/Desktop/Kelp/SNP_calling/Blast_SNPs")
-GO_list<-read.csv("nearest.gene_FLK_GWAS_Output_withGO.csv",sep=",",header=T)
-  dim(GO_list)
-  head(GO_list)  
-library(MASS)  
 
-GO<-GO_list$GoTerm
-GO.freq<-table(GO)
-pie(GO.freq)
+# ###### DID not pick this approach in the end
+# ###### Split Plots in NumPlots !!!!!!!!!!
+# for(values in c("Mean","Sd")){
+#   #for (nDH in c(24,96)){ #different nGP/nDH
+#   #  SumFile<-filenames[grepl(paste0("nDH",nDH),filenames)]
+#     SumFile<-filenames
+#     MeanFile<-SumFile[grep(paste0(values,".csv"),SumFile)]
+#     
+#     All <- lapply(MeanFile,function(i){
+#       read.csv(i, header=TRUE,row.names=1)
+#     })
+#     
+#     class(All)
+#     length(All)
+#     dim(All[[1]])
+#     All[[1]][1:5,1:6]
+#     
+#     All.df<-do.call(rbind.data.frame,All) 
+#     dim(All.df)
+#     head(All.df)    
+#     tail(All.df)
+#     str(All.df)
+#     
+#     library(stringr)  
+#     
+#     StringSplit<-str_split_fixed(string=All.df$Shorten,"_",7) ### This text string becomes a 336x7 matrix
+#     
+#     head(StringSplit)
+#     dim(StringSplit)
+#     All.df$nGP<-StringSplit[,4]  # Add this nGP level
+#     
+#     All.df$Ne<-StringSplit[,6]
+#     All.df$varE<-StringSplit[,5]
+#     
+#     dim(All.df)
+#     head(All.df)
+# 
+#     #write.csv(All.df,paste0("nDH",nDH,"_All.df","_",values,".csv"))
+#     
+#     library(ggplot2)
+#     library(dplyr)
+#     
+#     All.df$NumPlots<-as.factor(All.df$TestSP) # changed the names TestSP to "NumPlots"
+#     All.df$CycleTime<-as.factor(All.df$Year)  # changed the names "Year" to "CycleTime"
+#   #dev.set(i)
+#     All.df0<-All.df
+#   for (NumPlots in c(400, 1000)){
+#  
+#     tiff(file=paste("NumPlots",NumPlots,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
+#     
+#     #par(mfrow=c(2,3))
+#     ##### !!!!! Do y=Mean or Y=Sd
+#     
+#       if (values=="Mean"){
+#   ylim<-c(-0.5,7)
+#   }else{
+#   ylim<-c(0.5,1.1)
+#   }
+# 
+#     All.df<-droplevels(All.df0[which(All.df0$NumPlots==NumPlots),])
+#     
+#     plot<-ggplot(data=All.df,mapping=aes(x=Cycles,y=Mean))+
+#       geom_point(aes(shape=nGP))+
+#       geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP)) +
+#       theme_bw()+
+#       theme(panel.grid.major.x=element_blank(),panel.grid.minor = element_blank(),panel.border = element_rect(colour = "black"))+
+#       labs(x="Year",y="GP genetic mean")+ 
+#       facet_grid(rows=vars(Ne),cols=vars(varE))+
+#       ylim(ylim)+
+#       ggtitle(paste("number of Plots:",NumPlots,sep=""))+
+#       scale_color_manual(breaks = c("1yr","2yr"),values=c("orangered", "gray17"))+
+#       scale_shape_manual(values=c(3,16))
+#   
+#     print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
+#     dev.off()
+#  
+#  #### Add stderr bar   
+#    #geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))+ 
+#   }
+# }
+# 
+# ## how to add 2 newlines
+# ## cat("\n\n", file = "tests.txt", append = TRUE)
+# 
+
+
+
+
+# ##########
+# rm(list=ls())
+# setwd("/Users/maohuang/Desktop/Kelp/SNP_calling/Blast_SNPs")
+# GO_list<-read.csv("nearest.gene_FLK_GWAS_Output_withGO.csv",sep=",",header=T)
+#   dim(GO_list)
+#   head(GO_list)  
+# library(MASS)  
+# 
+# GO<-GO_list$GoTerm
+# GO.freq<-table(GO)
+# pie(GO.freq)
   

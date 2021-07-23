@@ -270,6 +270,11 @@ MeanLS[2]
 #nDH24 0.4522131 0.4370370
 #nDH96 0.4591701 0.4473146
 
+
+
+
+
+
 #### Add stderr bar   
 #geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))+ 
 
@@ -277,90 +282,104 @@ MeanLS[2]
 ## cat("\n\n", file = "tests.txt", append = TRUE)
 
 
-#### Adding in plot, x-axis on the 5-generation end Gain from each scheme; y-axis on the 5-generation end Genetic Variance from each scheme
-#### Figure 4
 
-WD<-"/Users/maohuang/Desktop/Kelp/Simulation_Study/SimulationKelp/210602Update/20Cycles/"
 
-plotdatafdr<-paste0(WD,"output/plottingdata/")
-setwd(plotdatafdr)
+# ###### DID not pick this approach in the end
+# ###### Split Plots in NumPlots !!!!!!!!!!
+# for(values in c("Mean","Sd")){
+#   #for (nDH in c(24,96)){ #different nGP/nDH
+#   #  SumFile<-filenames[grepl(paste0("nDH",nDH),filenames)]
+#     SumFile<-filenames
+#     MeanFile<-SumFile[grep(paste0(values,".csv"),SumFile)]
+#     
+#     All <- lapply(MeanFile,function(i){
+#       read.csv(i, header=TRUE,row.names=1)
+#     })
+#     
+#     class(All)
+#     length(All)
+#     dim(All[[1]])
+#     All[[1]][1:5,1:6]
+#     
+#     All.df<-do.call(rbind.data.frame,All) 
+#     dim(All.df)
+#     head(All.df)    
+#     tail(All.df)
+#     str(All.df)
+#     
+#     library(stringr)  
+#     
+#     StringSplit<-str_split_fixed(string=All.df$Shorten,"_",7) ### This text string becomes a 336x7 matrix
+#     
+#     head(StringSplit)
+#     dim(StringSplit)
+#     All.df$nGP<-StringSplit[,4]  # Add this nGP level
+#     
+#     All.df$Ne<-StringSplit[,6]
+#     All.df$varE<-StringSplit[,5]
+#     
+#     dim(All.df)
+#     head(All.df)
+# 
+#     #write.csv(All.df,paste0("nDH",nDH,"_All.df","_",values,".csv"))
+#     
+#     library(ggplot2)
+#     library(dplyr)
+#     
+#     All.df$NumPlots<-as.factor(All.df$TestSP) # changed the names TestSP to "NumPlots"
+#     All.df$CycleTime<-as.factor(All.df$Year)  # changed the names "Year" to "CycleTime"
+#   #dev.set(i)
+#     All.df0<-All.df
+#   for (NumPlots in c(400, 1000)){
+#  
+#     tiff(file=paste("NumPlots",NumPlots,"_",values,".tiff",sep=""),width=1400,height=1000,units="px",pointsize=12,res=150)
+#     
+#     #par(mfrow=c(2,3))
+#     ##### !!!!! Do y=Mean or Y=Sd
+#     
+#       if (values=="Mean"){
+#   ylim<-c(-0.5,7)
+#   }else{
+#   ylim<-c(0.5,1.1)
+#   }
+# 
+#     All.df<-droplevels(All.df0[which(All.df0$NumPlots==NumPlots),])
+#     
+#     plot<-ggplot(data=All.df,mapping=aes(x=Cycles,y=Mean))+
+#       geom_point(aes(shape=nGP))+
+#       geom_line(aes(group=Shorten,color=CycleTime,linetype=SelectSP)) +
+#       theme_bw()+
+#       theme(panel.grid.major.x=element_blank(),panel.grid.minor = element_blank(),panel.border = element_rect(colour = "black"))+
+#       labs(x="Year",y="GP genetic mean")+ 
+#       facet_grid(rows=vars(Ne),cols=vars(varE))+
+#       ylim(ylim)+
+#       ggtitle(paste("number of Plots:",NumPlots,sep=""))+
+#       scale_color_manual(breaks = c("1yr","2yr"),values=c("orangered", "gray17"))+
+#       scale_shape_manual(values=c(3,16))
+#   
+#     print(plot)   ### Need to print(plot) otherwise cannot save out as tiff
+#     dev.off()
+#  
+#  #### Add stderr bar   
+#    #geom_errorbar(aes(ymin=Mean, ymax=Mean+StdErr), width=.2,position=position_dodge(.9))+ 
+#   }
+# }
+# 
+# ## how to add 2 newlines
+# ## cat("\n\n", file = "tests.txt", append = TRUE)
+# 
 
-values<-"Mean"
-tmp<-NULL
-names<-NULL
-for (nDH in c(24,96)){
-  All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
+
+
+##########
+rm(list=ls())
+setwd("/Users/maohuang/Desktop/Kelp/SNP_calling/Blast_SNPs")
+GO_list<-read.csv("nearest.gene_FLK_GWAS_Output_withGO.csv",sep=",",header=T)
+  dim(GO_list)
+  head(GO_list)  
+library(MASS)  
+
+GO<-GO_list$GoTerm
+GO.freq<-table(GO)
+pie(GO.freq)
   
-  tmp<-c(tmp,All.df$Mean[All.df$Cycles==7])
-  names<-c(names,as.character(All.df$Shorten[All.df$Cycles==7]))
-}
-X<-tmp
-names(X)<-names
-
-values<-"Sd"
-tmp<-NULL
-names<-NULL
-for (nDH in c(24,96)){
-  All.df<-read.csv(paste0("nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
-  
-  tmp<-c(tmp,All.df$Mean[All.df$Cycles==7])
-  names<-c(names,as.character(All.df$Shorten[All.df$Cycles==7]))
-}
-Y<-tmp
-names(Y)<-names
-
-library(stringr)
-identical(str_split_fixed(names(X),"_",7)[1:6],str_split_fixed(names(Y),"_",7)[1:6]) # TRUE=same treatment order
-dataf<-data.frame(X,Y)
-
-tiff(file=paste0(plotdatafdr,"Figure4.tiff"),width=1400,height=1000,units="px",pointsize=12,res=150)
-
-library(ggplot2)
-plot<-ggplot(data=dataf,mapping=aes(x=X,y=Y))+
-  geom_point()+
-  labs(x="Genetic gain",y="Genetic variance")+
-  theme_bw()
-
-print(plot) 
-dev.off()
-
-head(dataf)
-colnames(dataf)[1]<-"Mean"
-colnames(dataf)[2]<-"Sd"
-dataf$SelectSP<-str_split_fixed(rownames(dataf),"_",7)[,1]
-dataf$NumPlots<-str_split_fixed(rownames(dataf),"_",7)[,2]
-dataf$Year<-str_split_fixed(rownames(dataf),"_",7)[,3]
-dataf$nGP<-str_split_fixed(rownames(dataf),"_",7)[,4]
-dataf$varE<-str_split_fixed(rownames(dataf),"_",7)[,5]
-dataf$Ne<-str_split_fixed(rownames(dataf),"_",7)[,6]
-
-write.csv(dataf,paste0(plotdatafdr,"dataf_FinalGain_Variance.csv"))
-
-#### Figure 4 
-library(tidyverse)
-gainSD <- read.csv(paste0(plotdatafdr,"dataf_FinalGain_Variance.csv"),sep=",",header=T)
-
-colnames(gainSD)[1] <- "Name"
-gainSD <- gainSD[order(gainSD$varE, gainSD$Ne),]
-plot(gainSD$Mean, gainSD$Sd, pch=16)
-
-pdf(paste0(plotdatafdr,"gainSDbyInterventionLines.pdf"), height=8, width=8)
-op <- par(mfrow=c(2,2))
-for (f in 4:7){
-  sb <- (4:7)[-(f-3)]  # the cols for SelectSP, NumPlots, Year, nGP are in col 4-7th
-  print(c(sb, f))
-  gainSD <- gainSD[order(gainSD[,8], gainSD[,9], gainSD[,sb[1]], gainSD[,sb[2]], gainSD[,sb[3]], gainSD[,f]),]
-    print(head(gainSD)) 
-  curNxt <- c(2, 1, 1, 1)[f-3] # which comes as the first order: 1 old scheme, 2:improved for each col
-  mainTitle <- c("SelectSP", "NumCross", "CycleTime", "nGP")[f-3]
-  plot(gainSD$Mean, gainSD$Sd, pch=16, col=rep(curNxt:(3-curNxt), 16), xlab="Final Genetic Mean", ylab="Final Genetic Variance", main=mainTitle)
-  for (i in 0:16){
-    lines(gainSD$Mean[i*2 + 1:2], gainSD$Sd[i*2 + 1:2], lwd=0.5, col="gray")
-  }
-  #text(6.6, 0.93, labels=c("A", "B", "C", "D")[f-3], cex=1.5)
-}
-
-dev.off()
-
-
-

@@ -8,12 +8,12 @@ runOneRep<-function(selection,nPheno,nDH,varE,Ne){
 
   library(AlphaSimR)
   n_gp<-nPheno/2
-  founderPop<-runMacs2(nInd=nInd,nChr=nChr,segSites=segSites,Ne=Ne,bp=bp,genLen=1,inbred=TRUE,ploidy=Sporo_ploidy, returnCommand = FALSE, nThreads = NULL)
+  founderPop<-runMacs2(nInd=1000,nChr=31,segSites=500,Ne=Ne,bp=1e+08,genLen=1,inbred=TRUE,ploidy=2L, returnCommand = FALSE, nThreads = NULL)
   # Founder Pop should be here
   
   SP<-SimParam$new(founderPop)
-  SP$addTraitA(nQtlPerChr=nQtlPerChr, mean=mean_Trait,var=var_Trait,corA=NULL)
-  SP$addSnpChip(nSnpPerChr=nSnpPerChr)
+  SP$addTraitA(nQtlPerChr=100, mean=0,var=1,corA=NULL)
+  SP$addSnpChip(nSnpPerChr=100)
   SP$setSexes("yes_sys")
   SP$setTrackRec(TRUE)
   pop <- newPop(founderPop, simParam=SP)
@@ -171,17 +171,17 @@ for (selection in c("rand","pheno")){
       for (varE in c(1,4)){
         for (Ne in c(60,600)){
           
-          nInd<-1000   # Number of founders
-          nChr<-31    # Number of chr
-          segSites<-500   # Number of segregating sites per chromosome
-          Sporo_ploidy<-2L   # Ploidy
-          bp<-1e+08       # Base pair length of chromosome
-          genLen=1        # Genetic length of chromosome in Morgans
+          #nInd<-1000   # Number of founders
+          #nChr<-31    # Number of chr
+          #segSites<-500   # Number of segregating sites per chromosome
+          #Sporo_ploidy<-2L   # Ploidy
+          #bp<-1e+08       # Base pair length of chromosome
+          #genLen=1        # Genetic length of chromosome in Morgans
           
-          nSnpPerChr<-100  # Number of SNP per chromosome
-          nQtlPerChr<-100  # Number of QTL per chromosome
-          mean_Trait<-0    # Trait mean
-          var_Trait<-1     # Trait variance
+          #nSnpPerChr<-100  # Number of SNP per chromosome
+          #nQtlPerChr<-100  # Number of QTL per chromosome
+          #mean_Trait<-0    # Trait mean
+          #var_Trait<-1     # Trait variance
           nDH0<-2           # Number of GPs per SP generated in the founder population to creat the inital GP0_DH
  
          allRep <- mclapply(1:nrep, function(dummy) {print(dummy); runOneRep(selection, nPheno, nDH, varE, Ne)},mc.cores=15)
