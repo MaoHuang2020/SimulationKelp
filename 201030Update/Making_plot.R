@@ -152,7 +152,7 @@ for(values in c("Mean","Sd")){
   for (nDH in c(24,96)){
   All.df<-read.csv(paste0(plotdatafdr,"nDH",nDH,"_All.df","_",values,".csv"),sep=",",header=TRUE)
     
-   Means<-All.df %>% group_by(TestSP) %>%                        # Specify group indicator (TestSP/SelectSP/Year)
+   Means<-All.df %>% group_by(nGP) %>%                        # Specify group indicator (TestSP=NumCross/SelectSP/Year)
       summarise_at(vars(Mean),              # Specify column
                 list(name = mean))    ###!!! list(meant=mean)
    Means<-as.data.frame(Means)
@@ -202,18 +202,13 @@ print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
 # 0.3535741*100%
 
 
-########## Sd output
+########## Sd output 07272021
 #$Sd_nDH24
 # 0.8821729
+
 #$Sd_nDH96
 # 0.790105
 
-### TestSP  400->1000
-# $Sd_nDH24 (1000-400)/400= 0.04034996
-# [1] 0.8647270 0.8996187
-
-# $Sd_nDH96 (1000-400)/400= 0.08701718
-# [1] 0.7571620 0.8230481
 
 ### SelectSP  pheno-> rand
 # $Sd_nDH24 (pheno-rand)/rand= -0.06925011
@@ -221,6 +216,14 @@ print((MeanLS$Mean_nDH24[1]-MeanLS$Mean_nDH24[2])/MeanLS$Mean_nDH24[2])
 
 # $Sd_nDH96  (pheno-rand)/rand= -0.05844567
 # [1] 0.7663209 0.8138892
+
+### TestSP/NumCross  400->1000
+# $Sd_nDH24 (1000-400)/400= 0.04034996
+# [1] 0.8647270 0.8996187
+
+# $Sd_nDH96 (1000-400)/400= 0.08701718
+# [1] 0.7571620 0.8230481
+
 
 ### Year  1yr -> 2yr
 # $Sd_nDH24  (1yr-2yr)/2yr= -0.04712685
@@ -258,15 +261,15 @@ MeanLS[2]
 #nDH96   0.454859
 #nDH24   0.4466945
 
-#TestSP 400 -> 1000 (increased, not always sig)
+#TestSP 400 -> 1000 (change from 400 to 1000, increased, not always sig)
 #nDH24 0.4283803 0.4650087
 #nDH96 0.4297344 0.4799837
 
-#SelectSP  pheno -> rand (decreased, always sig)
+#SelectSP  pheno -> rand (change from rand to pheno, decreased, always sig)
 #nDH24 0.4162794 0.4771097
 #nDH96 0.4292512 0.4804669
 
-#Year  1yr -> 2yrs (decreased, not always sig)
+#Year  1yr -> 2yrs (change from 2yrs to 1yr, increased, not always sig)
 #nDH24 0.4522131 0.4370370
 #nDH96 0.4591701 0.4473146
 
@@ -336,7 +339,7 @@ dataf$Ne<-str_split_fixed(rownames(dataf),"_",7)[,6]
 
 write.csv(dataf,paste0(plotdatafdr,"dataf_FinalGain_Variance.csv"))
 
-#### Figure 4 
+#### Supplemental Figure 1 
 library(tidyverse)
 gainSD <- read.csv(paste0(plotdatafdr,"dataf_FinalGain_Variance.csv"),sep=",",header=T)
 
