@@ -1,0 +1,113 @@
+#Test_Run_One_Year.R 
+is the file contains scripts to run the simulation for 1-year per cycle scheme
+Total number of breeding Cycles is set at 10
+Number of simulation reps is set at 20
+
+
+#Test_Run_Two_Years.R
+Follows the same workflow of the breeding pipeline, except that starting from year 3 (j=3), on the jth year, the genomic selection step to select GPs for making crosses is based on GPs from two years ago (GP_DH[[j-2]] generation), due to that GPs takes extra time to grow and accumulate biomass.
+
+
+#Making_plot.R
+This includes the codes for generating all figures in the MS
+
+
+#Step by Step script explained for Test_Run_One_Year.R  :
+runOneRep(): the function of running 1-year per cycle scheme for one time, it requires inputs:
+"selection": what is the selection scheme at SP stage, it is either "rand" or "pheno", as defined by AlphaSimR syntax
+
+"nPheno":the number of SP plots to be tested on farm, it is either 400 pr 1000
+"nDH": the number of GPs survive through flow cetometry system, it is either 24 or 96
+"varE": the error variance to get the estimated heritability of 0.2 or 0.5, it is either 4 or 1
+"Ne":the effective population size, it is either 60 to 600
+
+n_gp: the number of GPs that would be generated from selected SPs, each GP is set to make 2 crosses
+
+founderPop: founder population,
+AlphaSimR syntax:
+nInd: the number of individuals is 1000, nChr is set at 31, which is the number of chromosomes in Saccharina japonica
+segSites: number of segregating sites per chromosome is set at 500
+Ne: effective popuation size for founders
+bp: base pair length of chromosome, set at default value of 1e+08
+genLen: genetic length of chromosome in Morgans, set at 1
+
+nQtlPerChr : Add trait QTL for the founder SPs, the trait has 100 QTLs per chromosome, with mean 0 and variance of 1.
+
+nSnpPerChr: Add genotypic data for the SPs, where number of SNPs per Chromosome is 100.
+
+pop: the founder population being created in each simulation rep.
+meanG(): is the mean genetic value of the population by AlphaSimR
+
+generation: the vector stores the generation from founders, to cycle 1,2…10 generations
+
+The breeding pipeline (Figure XXX) starts with founder popualtions (pop)
+GP0_DH : Creating the double haploids of founders 
+GP0_DH_all : Get genetic information on all the GP0_DH individuals. Please note, these syntax are for double haploid individuals that AlphaSimR could only generate 
+Then going forward for each cycle (j)
+
+
+For the first 2 years (j <2),
+females: randomly selecting female gametophytes from the stock of founders GPs
+males: randomly selecting male gametophytes from the stock of founders GPs
+
+GP_F and GP_M: genotype these female and male gametophytes
+ 
+crossPlan: randomly mating the female GPs to male GPs, while each GP is being used for crossing twice
+
+Spj: the SPs crossed from the aforementioned GPs
+Spj is phenotyped 
+Sporo: the SP population from year 1 to jth years
+Spj_s: The 10% SPs being selected, based on “selection cheme”
+SPselInt: Estimating empirical selection intensity based on difference of standardized mean of Spj population and the Spj_s population
+
+GP_DHj: creating GPs from the SPj_s population
+GP_DH: the list of GPs from year 1 to jth years
+
+Going forward starting year 3,
+TP_j: is the population at jth year, Sporo, which is all historical years of SP data
+GS_j is the training population model at jth year
+
+GEBV_j: GEBVs for the GPs at one years ago (j-1), given a One-year per cycle scheme
+Or two years ago (j-2), given a Two_year per cycle scheme
+
+GScor: GS correlation accuracy at the jth GPs stage
+
+females: selecting female GPs based on their estimated GEBVs. The number of GPs being selected is nPheno/2
+males: selecting male GPs based on their estimated GEBVs
+
+GPselInt: Selection intensity on the GPs stage
+
+crossPlan: the list of crosses to make using selected GPs baed on their GEBVs
+
+Sporo_j: crossing the GPs and set phenotypes
+
+Sporo: is the list for 1 to jth year phenotyped Farm grown SPs
+
+Sporo_js<-selecting the 10% SPs from the jth year field SPs
+Sporo_s<-the list of 1 to ith year selected SPs
+
+SPselInt: selection intensity for the SP stage at jth year, when j >2
+
+GP_DH_j: the GPs generated from the jth selection SP population (Sporo_s)
+GP_DH: the list of GPs being selected from 1 to jth year
+
+mean_g1: the mean genetic value for Farm tested SPs
+sd_g1: the total genetic variance for Farm tested SPs
+
+mean_g2: the mean genetic value for GPs
+sd_g2: the total genetic variance for GPs
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
