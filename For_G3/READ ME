@@ -1,18 +1,7 @@
-#Test_Run_One_Year.R 
-is the file contains scripts to run the simulation for 1-year per cycle scheme
+Test_Run_One_Year.R is the file contains scripts to run the simulation for 1-year per cycle scheme
 Total number of breeding Cycles is set at 10
 Number of simulation reps is set at 20
 
-
-#Test_Run_Two_Years.R
-Follows the same workflow of the breeding pipeline, except that starting from year 3 (j=3), on the jth year, the genomic selection step to select GPs for making crosses is based on GPs from two years ago (GP_DH[[j-2]] generation), due to that GPs takes extra time to grow and accumulate biomass.
-
-
-#Making_plot.R
-This includes the codes for generating all figures in the MS
-
-
-#Step by Step script explained for Test_Run_One_Year.R  :
 runOneRep(): the function of running 1-year per cycle scheme for one time, it requires inputs:
 "selection": what is the selection scheme at SP stage, it is either "rand" or "pheno", as defined by AlphaSimR syntax
 
@@ -40,9 +29,11 @@ meanG(): is the mean genetic value of the population by AlphaSimR
 
 generation: the vector stores the generation from founders, to cycle 1,2…10 generations
 
-The breeding pipeline (Figure XXX) starts with founder popualtions (pop)
+The breeding pipeline (Figure 1b, 1c) starts with founder popualtions (pop)
 GP0_DH : Creating the double haploids of founders 
-GP0_DH_all : Get genetic information on all the GP0_DH individuals. Please note, these syntax are for double haploid individuals that AlphaSimR could only generate 
+GP0_DH_all : Get genetic information on all the GP0_DH individuals. 
+
+
 Then going forward for each cycle (j)
 
 
@@ -68,7 +59,7 @@ TP_j: is the population at jth year, Sporo, which is all historical years of SP 
 GS_j is the training population model at jth year
 
 GEBV_j: GEBVs for the GPs at one years ago (j-1), given a One-year per cycle scheme
-Or two years ago (j-2), given a Two_year per cycle scheme
+(Or two years ago (j-2), given a Two_year per cycle scheme)
 
 GScor: GS correlation accuracy at the jth GPs stage
 
@@ -98,15 +89,20 @@ mean_g2: the mean genetic value for GPs
 sd_g2: the total genetic variance for GPs
 
 
+Test_Run_Two_Years.R
+Follows the same workflow of the breeding pipeline as that in “Test_Run_One_Year.R”, except that starting from year 3 (j=3), on the jth year, the genomic selection step to select GPs for making crosses is based on GPs from two years ago (GP_DH[[j-2]] generation), due to that GPs takes extra time to grow and accumulate biomass.
+
+
+
+ 
+
+
+
 
 
  
 
 
-
-
-
- 
 
 
 
