@@ -1,4 +1,4 @@
-#### Test_Run_One_Year.R is the file contains scripts to run the simulation for 1-year per cycle scheme:
+#### 1. Test_Run_One_Year.R is the file contains scripts to run the simulation for 1-year per cycle scheme:
 
 Total number of breeding Cycles is set at 10
 Number of simulation reps is set at 20
@@ -90,10 +90,10 @@ mean_g2: the mean genetic value for GPs
 sd_g2: the total genetic variance for GPs
 
 
-#### Test_Run_Two_Years.R
+#### 2. Test_Run_Two_Years.R
 Follows the same workflow of the breeding pipeline as that in “Test_Run_One_Year.R”, except that starting from year 3 (j=3), on the jth year, the genomic selection step to select GPs for making crosses is based on GPs from two years ago (GP_DH[[j-2]] generation), due to that GPs takes extra time to grow and accumulate biomass.
 
-#### Making_plot.R
+#### 3.  Making_plot.R
 Output results analysis. 
 It includes the script to compile output results from AlphaSimR to make figures; conduct ANOVAs; and to assess the results percentage changes at different levels of a given parameter
 
